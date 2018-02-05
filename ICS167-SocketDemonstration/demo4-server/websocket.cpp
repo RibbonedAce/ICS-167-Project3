@@ -675,7 +675,7 @@ void webSocket::setPeriodicHandler(nullCallback callback){
     callPeriodic = callback;
 }
 
-void webSocket::startServer(int port,string uName){
+void webSocket::startServer(int port){
     showAvailableIP();
 
 	this->pongGame = new game(SCORELIMIT);
@@ -731,7 +731,7 @@ void webSocket::startServer(int port,string uName){
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
                         if (newfd != -1){
                             /* add new client */
-                            wsAddClient(newfd, cli_addr.sin_addr, uName);
+                            wsAddClient(newfd, cli_addr.sin_addr,"G");
                             //Deprecated ntoa API
 							//printf("New connection from %s on socket %d\n", inet_ntoa(cli_addr.sin_addr), newfd);
 							char cli_addr_str[INET_ADDRSTRLEN];

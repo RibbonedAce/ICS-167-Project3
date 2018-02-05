@@ -96,7 +96,7 @@ public:
     void setCloseHandler(defaultCallback callback);
     void setMessageHandler(messageCallback callback);
     void setPeriodicHandler(nullCallback callback);
-    void startServer(int port, string uName);
+    void startServer(int port);
     void stopServer();
 	void startGame();
 	void endGame();
