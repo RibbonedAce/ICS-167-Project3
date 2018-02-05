@@ -5,7 +5,7 @@
 #include <time.h>
 #include "websocket.h"
 
-#define PORT1 2018
+#define PORT1 8082
 using namespace std;
 
 webSocket server;
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
     server.setPeriodicHandler(periodicHandler);
 
     /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
-    server.startServer(PORT1,"Giraffe");
+    server.startServer(PORT1);
 
     return 1;
 }

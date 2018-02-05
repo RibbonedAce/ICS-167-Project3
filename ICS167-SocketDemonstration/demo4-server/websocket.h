@@ -95,7 +95,7 @@ public:
     void setCloseHandler(defaultCallback callback);
     void setMessageHandler(messageCallback callback);
     void setPeriodicHandler(nullCallback callback);
-    void startServer(int port, string uName);
+    void startServer(int port);
     void stopServer();
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
