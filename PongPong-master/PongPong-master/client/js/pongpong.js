@@ -1,5 +1,5 @@
 //Which server to connect to
-let SERVER = "thefeeltra.in:8082";
+let SERVER = "127.0.0.1:8082";
 
 var server,
 
