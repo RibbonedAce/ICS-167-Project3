@@ -14,6 +14,7 @@
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
+#define SCORELIMIT 10
 #endif
 
 #include <stdio.h>
@@ -25,6 +26,7 @@
 #include <map>
 #include "websocket.h"
 #include "base64.h"
+#include "game.h"
 #include "sha1.h"
 
 using namespace std;
@@ -676,6 +678,9 @@ void webSocket::setPeriodicHandler(nullCallback callback){
 void webSocket::startServer(int port,string uName){
     showAvailableIP();
 
+	this->pongGame = new game(SCORELIMIT);
+	this->runningGame = false;
+
     int yes = 1;
     char buf[4096];
     struct sockaddr_in serv_addr, cli_addr;
@@ -782,4 +787,25 @@ void webSocket::stopServer(){
     socketIDmap.clear();
     FD_ZERO(&fds);
     fdmax = 0;
+}
+
+void webSocket::startGame() {
+	this->runningGame = true;
+}
+
+void webSocket::endGame() {
+	this->runningGame = false;
+	this->pongGame->endGame();
+}
+
+int webSocket::getNumOfPlayers() {
+	return this->pongGame->players.size;
+}
+
+bool webSocket::gameIsPlaying() {
+	return this->runningGame;
+}
+
+void webSocket::editPlayerPos(int index, float _position) {
+	this->pongGame->players[index].position = _position;
 }

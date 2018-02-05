@@ -12,7 +12,7 @@ webSocket server;
 
 /* called when a client connects */
 void openHandler(int clientID){
-    ostringstream os;
+    /*ostringstream os;
     os << "Stranger " << clientID << " has joined.";
 
     vector<int> clientIDs = server.getClientIDs();
@@ -20,31 +20,39 @@ void openHandler(int clientID){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }
-    server.wsSend(clientID, "Welcome!");
+    server.wsSend(clientID, "Welcome!");*/
+	if (server.getNumOfPlayers() >= 1) {
+		server.startGame();
+	}
 }
 
 /* called when a client disconnects */
 void closeHandler(int clientID){
-    ostringstream os;
+    /*ostringstream os;
     os << "Stranger " << clientID << " has leaved.";
 
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
-    }
+    }*/
+	if (server.gameIsPlaying()) {
+		server.endGame();
+	}
 }
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message){
-    ostringstream os;
+    /*ostringstream os;
     os << "Stranger " << clientID << " says: " << message;
 
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
-    }
+    */
+	float newPos = stof(message);
+	server.editPlayerPos(clientID, newPos);
 }
 
 /* called once per select() loop */

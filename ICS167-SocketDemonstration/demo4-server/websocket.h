@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <time.h>
+#include "game.h"
 
 using namespace std;
 
@@ -97,11 +98,18 @@ public:
     void setPeriodicHandler(nullCallback callback);
     void startServer(int port, string uName);
     void stopServer();
+	void startGame();
+	void endGame();
+	int getNumOfPlayers();
+	bool gameIsPlaying();
+	void editPlayerPos(int index, float _position);
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
     vector<int> getClientIDs();
     string getClientIP(int clientID);
 private:
+	game* pongGame;
+	bool runningGame;
     vector<wsClient *> wsClients;
     map<int, int> socketIDmap;
     fd_set fds;
