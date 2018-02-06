@@ -20,31 +20,24 @@
 		#body1 {width:450px; float: left; border: 1px solid black}
 		#log {width:400px;height:200px}
 		#message {width:400px;height:20px}
-		
-		#body2{
-			width:700px;
-			height:700px; 
-			background-color:white; 
+		#myCanvas{
+			width: 500px;
+			height: 500px;
+			background-color: gray;
 			border: 1px solid black;
-			float: right;
-			}
-		.ball {
-			width: 20px;
-			height: 20px;
-			background-color: red;
-			border-radius: 10px;
-		}
-		.paddle{
-			width: 100px;
-			height: 10px;
-			background-color: green;
+			margin: 300px 20px;
 		}
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
 	<script>
 		var Server;
-		
+		var x=150;
+		var y=75;
+		var x1 = 20;
+		var y1 = 20;
+		var dx=5;
+		var dy=5;
 		function log( text ) {
 			$log = $('#log');
 			//Add text to log
@@ -59,13 +52,13 @@
 
         function connect(){
             log('Connecting...');
-			Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
-
+			Server = new FancyWebSocket('ws://' + '127.0.0.1:8082');
+			var uName = document.getElementById("name").value;
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
 					log( 'You: ' + this.value );
 					send( this.value );
-
+					send(uName);
 					$(this).val('');
 				}
 			});
@@ -89,16 +82,59 @@
 
 			Server.connect();
         }
+		function init()
+		{
+			context= myCanvas.getContext('2d');
+			draw();
+			return setInterval(draw,10);
+		}
+
+		function draw()
+		{
+			context.clearRect(0,0,300,300);
+			context.beginPath();
+			context.fillStyle="#0000ff";
+			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
+			context.arc(x,y,2,0,Math.PI*2,true);
+			context.rect(x1,y1,5,20);
+			context.closePath();
+			context.fill();
+		}
 		
+		function clear() {
+			ctx.clearRect(0, 0, 500, 500);
+		}		
+		
+		function doKeyDown(evt)
+		{
+			switch (evt.keyCode) 
+			{
+			case 87:  /* Up arrow was pressed */
+				if (y1 - dy > -5)
+				{ 
+					y1 -= dy;
+					Server.send();
+				}
+				break;
+			case 83:  /* Down arrow was pressed */
+				if (y1 + dy < 135)
+				{ 
+					y1 += dy;
+					Server.send();
+				}
+				break;
+			}
+		}
+		window.addEventListener('keydown',doKeyDown,true);
 	</script>
 </head>
 
-<body>
+<body onload = "init();">
 <div id = 'container'>
 	<div id='body1'>
-        Server ip: <input type='text' id='ip' name='ip'>
-        Server port: <input type='text' id='port' name='port'>
+        UserName: <input type='text' id='name' name='name'>
         <button type="button" id='cntBtn' onclick="connect();">Connect</button>
+		<button type="button" id='cntBtn' onclick="connect();">Disconnect</button>
 		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
 		<input type='text' id='message' name='message' />
 	</div>
@@ -107,6 +143,8 @@
 		<div class ="paddle" id = "bottomPaddle"></div>
 	</div>
 </div>
+<canvas id = "myCanvas">
+</canvas>
 </body>
 
 </html>
