@@ -31,6 +31,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
 	<script>
+		
 		var Server;
 		var x=150;
 		var y=75;
@@ -38,6 +39,8 @@
 		var y1 = 20;
 		var dx=5;
 		var dy=5;
+		
+		
 		function log( text ) {
 			$log = $('#log');
 			//Add text to log
@@ -71,7 +74,7 @@
 
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
-                document.getElementById("cntBtn").disabled = false;
+                document.getElementById("dcBtn").disabled = false;
 				log( "Disconnected." );
 			});
 
@@ -113,17 +116,16 @@
 				if (y1 - dy > -5)
 				{ 
 					y1 -= dy;
-					Server.send();
 				}
 				break;
 			case 83:  /* Down arrow was pressed */
 				if (y1 + dy < 135)
 				{ 
 					y1 += dy;
-					Server.send();
 				}
 				break;
 			}
+			Server.send(y1);
 		}
 		window.addEventListener('keydown',doKeyDown,true);
 	</script>
@@ -134,7 +136,7 @@
 	<div id='body1'>
         UserName: <input type='text' id='name' name='name'>
         <button type="button" id='cntBtn' onclick="connect();">Connect</button>
-		<button type="button" id='cntBtn' onclick="connect();">Disconnect</button>
+		<button type="button" id='dcBtn' onclick="connect();">Disconnect</button>
 		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
 		<input type='text' id='message' name='message' />
 	</div>
