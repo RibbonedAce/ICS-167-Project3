@@ -79,7 +79,8 @@
 			});
 
 			//Log any messages sent from server
-			Server.bind('message', function( payload ) {
+			Server.bind('message', function( payload ) 
+			{
 				log( payload );
 			});
 
@@ -125,7 +126,7 @@
 				}
 				break;
 			}
-			Server.send(y1);
+			Server.send("Position:" + y1.toString());
 		}
 		window.addEventListener('keydown',doKeyDown,true);
 	</script>
