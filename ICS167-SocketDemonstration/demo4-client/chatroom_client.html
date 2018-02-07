@@ -23,7 +23,7 @@
 		#myCanvas{
 			width: 500px;
 			height: 500px;
-			background-color: gray;
+			background-color: white;
 			border: 1px solid black;
 			margin: 300px 20px;
 		}
@@ -40,7 +40,6 @@
 		var dx=5;
 		var dy=5;
 		
-		
 		function log( text ) {
 			$log = $('#log');
 			//Add text to log
@@ -48,7 +47,11 @@
 			//Autoscroll
 			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
 		}
-
+		function updateBall(xPos,yPos)
+		{
+			x = xPos;
+			y = yPos;
+		}
 		function send( text ) {
 			Server.send( 'message', text );
 		}
@@ -61,7 +64,7 @@
 				if ( e.keyCode == 13 && this.value ) {
 					log( 'You: ' + this.value );
 					send( this.value );
-					send(uName);
+					send(uName.toString());
 					$(this).val('');
 				}
 			});
@@ -74,13 +77,15 @@
 
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
-                document.getElementById("dcBtn").disabled = false;
+                document.getElementById("cntBtn").disabled = false;
 				log( "Disconnected." );
 			});
 
 			//Log any messages sent from server
-			Server.bind('message', function( payload ) {
+			Server.bind('message', function( payload ) 
+			{
 				log( payload );
+				//updateBall(5,5);
 			});
 
 			Server.connect();
@@ -125,7 +130,7 @@
 				}
 				break;
 			}
-			Server.send(y1);
+			Server.send("Position:" + y1.toString());
 		}
 		window.addEventListener('keydown',doKeyDown,true);
 	</script>
@@ -144,6 +149,8 @@
 		<div class ="ball" id = "ball"></div>
 		<div class ="paddle" id = "bottomPaddle"></div>
 	</div>
+	<p id = "demo"></p>
+	<button id = "payload" onclick="myFunction()"> Print payload</button>
 </div>
 <canvas id = "myCanvas">
 </canvas>
