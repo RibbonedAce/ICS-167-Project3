@@ -21,6 +21,7 @@ void openHandler(int clientID){
             server.wsSend(clientIDs[i], os.str());
     }
     server.wsSend(clientID, "Welcome!");*/
+	server.wsSend(clientID, "Welcome!");
 }
 
 /* called when a client disconnects */
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]){
     server.setMessageHandler(messageHandler);
     server.setPeriodicHandler(periodicHandler);
 
-    /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
+    /* start the chatroom server, listen to ip '127.0.0.1' and port '8082' */
     server.startServer(PORT1);
 
     return 1;

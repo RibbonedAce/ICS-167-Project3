@@ -14,6 +14,7 @@
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
+#define MAX_CLIENTS 1
 #endif
 
 #include <stdio.h>
@@ -641,14 +642,13 @@ int webSocket::wsGetNextClientID(){
     return i;
 }
 
-void webSocket::wsAddClient(int socket, in_addr ip, string uName){
+void webSocket::wsAddClient(int socket, in_addr ip){
     FD_SET(socket, &fds);
     if (socket > fdmax)
         fdmax = socket;
 
     int clientID = wsGetNextClientID();
     wsClient *newClient = new wsClient(socket, ip);
-	newClient->userName = uName;
     if (clientID >= wsClients.size()){
 		wsClients.push_back(newClient);
     }
@@ -725,12 +725,12 @@ void webSocket::startServer(int port){
         if (select(fdmax+1, &read_fds, NULL, NULL, &timeout) > 0){
             for (int i = 0; i <= fdmax; i++){
                 if (FD_ISSET(i, &read_fds)){
-                    if (i == listenfd){
+                    if (i == listenfd && wsClients.size() < MAX_CLIENTS){
                         socklen_t addrlen = sizeof(cli_addr);
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
                         if (newfd != -1){
                             /* add new client */
-                            wsAddClient(newfd, cli_addr.sin_addr,"G");
+                            wsAddClient(newfd, cli_addr.sin_addr);
                             //Deprecated ntoa API
 							//printf("New connection from %s on socket %d\n", inet_ntoa(cli_addr.sin_addr), newfd);
 							char cli_addr_str[INET_ADDRSTRLEN];

@@ -64,11 +64,9 @@ public:
         FrameBuffer.clear();
         MessageOpcode = 0;
         MessageBufferLength = 0;
-		userName = "";
 		consectHits = 0;
     }
 	int consectHits;					   // number of hits client can do without missing.
-	string userName;					   // client userName;
     int socket;                            // client socket
     string MessageBuffer;                  // a blank string when there's no incoming frames
     int ReadyState;                        // between 0 and 3
@@ -130,7 +128,7 @@ private:
     bool wsProcessClientHandshake(int clientID, char *buffer);
     bool wsProcessClient(int clientID, char *buffer, int bufferLength);
     int wsGetNextClientID();
-    void wsAddClient(int socket, in_addr ip, string uName);
+    void wsAddClient(int socket, in_addr ip);
 
     defaultCallback callOnOpen;
     defaultCallback callOnClose;
