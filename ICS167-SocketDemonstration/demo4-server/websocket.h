@@ -102,7 +102,10 @@ public:
 	void endGame();
 	int getNumOfPlayers();
 	bool gameIsPlaying();
+	void addPlayer(int id, string _name);
 	void editPlayerPos(int index, float _position);
+	void updateGame();
+	string getGameStats();
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
     vector<int> getClientIDs();

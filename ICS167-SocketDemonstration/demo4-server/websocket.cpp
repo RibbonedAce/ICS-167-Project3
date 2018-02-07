@@ -14,7 +14,6 @@
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
-#define SCORELIMIT 10
 #endif
 
 #include <stdio.h>
@@ -651,7 +650,7 @@ void webSocket::wsAddClient(int socket, in_addr ip, string uName){
     wsClient *newClient = new wsClient(socket, ip);
 	newClient->userName = uName;
     if (clientID >= wsClients.size()){
-        wsClients.push_back(newClient);
+		wsClients.push_back(newClient);
     }
     else {
         wsClients[clientID] = newClient;
@@ -678,7 +677,7 @@ void webSocket::setPeriodicHandler(nullCallback callback){
 void webSocket::startServer(int port){
     showAvailableIP();
 
-	this->pongGame = new game(SCORELIMIT);
+	this->pongGame = new game();
 	this->runningGame = false;
 
     int yes = 1;
@@ -795,11 +794,11 @@ void webSocket::startGame() {
 
 void webSocket::endGame() {
 	this->runningGame = false;
-	this->pongGame->endGame();
+	this->pongGame->stopGame();
 }
 
 int webSocket::getNumOfPlayers() {
-	return this->pongGame->players.size;
+	return this->pongGame->players.size();
 }
 
 bool webSocket::gameIsPlaying() {
@@ -808,4 +807,23 @@ bool webSocket::gameIsPlaying() {
 
 void webSocket::editPlayerPos(int index, float _position) {
 	this->pongGame->players[index].position = _position;
+}
+
+void webSocket::addPlayer(int id, string _name) {
+	this->pongGame->addPlayer(id, _name);
+}
+
+void webSocket::updateGame() {
+	if (runningGame)
+	{
+		pongGame->updateBall();
+	}
+}
+
+string webSocket::getGameStats() {
+	string result = to_string(pongGame->ballPos.x) + "," + to_string(pongGame->ballPos.y);
+	for (map<int, player>::iterator it = this->pongGame->players.begin(); it != this->pongGame->players.end(); ++it) {
+		result += ";" + to_string(it->first) + "," + to_string(it->second.position) + "," + to_string(it->second.score);
+	}
+	return result;
 }

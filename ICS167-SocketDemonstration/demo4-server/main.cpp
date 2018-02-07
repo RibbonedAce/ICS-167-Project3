@@ -21,9 +21,6 @@ void openHandler(int clientID){
             server.wsSend(clientIDs[i], os.str());
     }
     server.wsSend(clientID, "Welcome!");*/
-	if (server.getNumOfPlayers() >= 1) {
-		server.startGame();
-	}
 }
 
 /* called when a client disconnects */
@@ -51,13 +48,21 @@ void messageHandler(int clientID, string message){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     */
-	float newPos = stof(message);
-	server.editPlayerPos(clientID, newPos);
+	string prefix = message.substr(0, message.find(':'));
+	if (prefix == "Name")
+	{
+		server.addPlayer(clientID, message.substr(message.find(':')));
+	}
+	else if (prefix == "Position")
+	{
+		float newPos = stof(message);
+		server.editPlayerPos(clientID, newPos);
+	}
 }
 
 /* called once per select() loop */
 void periodicHandler(){
-    static time_t next = time(NULL) + 10;
+    /*static time_t next = time(NULL) + 10;
     time_t current = time(NULL);
     if (current >= next){
         ostringstream os;
@@ -73,7 +78,16 @@ void periodicHandler(){
             server.wsSend(clientIDs[i], os.str());
 
         next = time(NULL) + 10;
-    }
+    }*/
+	server.updateGame();
+
+	ostringstream os;
+	os << "Game:" << server.getGameStats();
+
+	vector<int> clientIDs = server.getClientIDs();
+	for (int i = 0; i < clientIDs.size(); i++) {
+		server.wsSend(clientIDs[i], os.str());
+	}
 }
 
 int main(int argc, char *argv[]){

@@ -1,6 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
+#define SCORE_LIMIT 10
+
+#include <map>
 #include <string>
 #include <vector>
 
@@ -19,20 +22,28 @@ struct player {
 
 class game {
 public:
-	vector<player> players;
+	map<int, player> players;
 	xyCoords ballPos;
+	int ballDirection;
 	int maxScore;
 	
-	game(int _maxScore) {
-		players = vector<player>();
-		maxScore = _maxScore;
+	game() {
+		players = map<int, player>();
+		ballPos.x = 0;
+		ballPos.y = 0;
+		ballDirection = rand() % 360;
+		maxScore = SCORE_LIMIT;
 	}
 
-	void addPlayer(string _name);
-	void removePlayer(string _name);
-	int getPlayerIndex(string _name);
+	void addPlayer(int id, string _name);
+	void removePlayer(int id);
+	void updateBall();
 	void changeScore(int index, int toAdd);
-	void endGame();
+	void stopGame();
+
+private:
+	void flipBallVertical();
+	void flipBallHorizontal();
 };
 
 #endif
