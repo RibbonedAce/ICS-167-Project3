@@ -12,7 +12,7 @@ webSocket server;
 
 /* called when a client connects */
 void openHandler(int clientID){
-    /*ostringstream os;
+    ostringstream os;
     os << "Stranger " << clientID << " has joined.";
 
     vector<int> clientIDs = server.getClientIDs();
@@ -20,7 +20,7 @@ void openHandler(int clientID){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }
-    server.wsSend(clientID, "Welcome!");*/
+    server.wsSend(clientID, "Welcome!");
 }
 
 /* called when a client disconnects */
@@ -39,15 +39,16 @@ void closeHandler(int clientID){
 }
 
 /* called when a client sends a message to the server */
-void messageHandler(int clientID, string message){
-    /*ostringstream os;
+void messageHandler(int clientID, string message)
+{
+    ostringstream os;
     os << "Stranger " << clientID << " says: " << message;
 
     vector<int> clientIDs = server.getClientIDs();
-    for (int i = 0; i < clientIDs.size(); i++){
-        if (clientIDs[i] != clientID)
-            server.wsSend(clientIDs[i], os.str());
-    */
+	for (int i = 0; i < clientIDs.size(); i++) {
+		if (clientIDs[i] != clientID)
+			server.wsSend(clientIDs[i], os.str());
+	}
 	string prefix = message.substr(0, message.find(':'));
 	if (prefix == "Name")
 	{
@@ -61,11 +62,13 @@ void messageHandler(int clientID, string message){
 }
 
 /* called once per select() loop */
-void periodicHandler(){
-    /*static time_t next = time(NULL) + 10;
+void periodicHandler()
+{
+    static time_t next = time(NULL) + 10;
     time_t current = time(NULL);
-    if (current >= next){
-        ostringstream os;
+    if (current >= next)
+	{
+        /*ostringstream os;
 		//Deprecated ctime API in Windows 10
 		char timecstring[26];
 		ctime_s(timecstring, sizeof(timecstring), &current);
@@ -77,17 +80,17 @@ void periodicHandler(){
         for (int i = 0; i < clientIDs.size(); i++)
             server.wsSend(clientIDs[i], os.str());
 
-        next = time(NULL) + 10;
-    }*/
-	server.updateGame();
+        next = time(NULL) + 10;*/
+		server.updateGame();
+		ostringstream os;
+		os << "Game:" << server.getGameStats();
+		vector<int> clientIDs = server.getClientIDs();
+		for (int i = 0; i < clientIDs.size(); i++) {
+			server.wsSend(clientIDs[i], os.str());
+		}
+    }
 
-	ostringstream os;
-	os << "Game:" << server.getGameStats();
-
-	vector<int> clientIDs = server.getClientIDs();
-	for (int i = 0; i < clientIDs.size(); i++) {
-		server.wsSend(clientIDs[i], os.str());
-	}
+	
 }
 
 int main(int argc, char *argv[]){

@@ -641,14 +641,13 @@ int webSocket::wsGetNextClientID(){
     return i;
 }
 
-void webSocket::wsAddClient(int socket, in_addr ip, string uName){
+void webSocket::wsAddClient(int socket, in_addr ip){
     FD_SET(socket, &fds);
     if (socket > fdmax)
         fdmax = socket;
 
     int clientID = wsGetNextClientID();
     wsClient *newClient = new wsClient(socket, ip);
-	newClient->userName = uName;
     if (clientID >= wsClients.size()){
 		wsClients.push_back(newClient);
     }
@@ -730,7 +729,7 @@ void webSocket::startServer(int port){
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
                         if (newfd != -1){
                             /* add new client */
-                            wsAddClient(newfd, cli_addr.sin_addr,"G");
+                            wsAddClient(newfd, cli_addr.sin_addr);
                             //Deprecated ntoa API
 							//printf("New connection from %s on socket %d\n", inet_ntoa(cli_addr.sin_addr), newfd);
 							char cli_addr_str[INET_ADDRSTRLEN];
