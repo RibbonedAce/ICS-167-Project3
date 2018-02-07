@@ -40,7 +40,6 @@
 		var dx=5;
 		var dy=5;
 		
-		
 		function log( text ) {
 			$log = $('#log');
 			//Add text to log
@@ -129,6 +128,12 @@
 			Server.send("Position:" + y1.toString());
 		}
 		window.addEventListener('keydown',doKeyDown,true);
+		
+		function myFucnction()
+		{
+			var n = payload;
+			document.getElementById("demo").innerHTML = n;
+		}
 	</script>
 </head>
 
@@ -145,6 +150,8 @@
 		<div class ="ball" id = "ball"></div>
 		<div class ="paddle" id = "bottomPaddle"></div>
 	</div>
+	<p id = "demo"></p>
+	<button id = "payload" onclick="myFucnction()"> Print payload</button>
 </div>
 <canvas id = "myCanvas">
 </canvas>
