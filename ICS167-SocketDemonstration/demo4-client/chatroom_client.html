@@ -33,10 +33,10 @@
 	<script>
 		
 		var Server;
-		var x=150;
-		var y=75;
-		var x1 = 20;
-		var y1 = 20;
+		var xBal=150;
+		var yBall=75;
+		var xPaddle = 20;
+		var yPaddle = 20;
 		var dx=5;
 		var dy=5;
 		
@@ -47,10 +47,19 @@
 			//Autoscroll
 			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
 		}
+		
+		function ProcessPayLoad(text)
+		{
+			var xP;
+			var yP;
+			var pLoad = text.split(":").pop();
+			
+			updateBall(parseInt(xP),parseInt(yP));
+		}
 		function updateBall(xPos,yPos)
 		{
-			x = xPos;
-			y = yPos;
+			xBall = xPos;
+			yBall = yPos;
 		}
 		function send( text ) {
 			Server.send( 'message', text );
@@ -59,20 +68,24 @@
         function connect(){
             log('Connecting...');
 			Server = new FancyWebSocket('ws://' + '127.0.0.1:8082');
-			var uName = document.getElementById("name").value;
+			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
 					log( 'You: ' + this.value );
 					send( this.value );
-					send(uName.toString());
 					$(this).val('');
 				}
 			});
-
+		function disconnect()
+		{
+			log('Disconnect from server');
+		}
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
+				var uName = document.getElementById("name").value;
+				server.send("username:"+uName);
 			});
 
 			//OH NOES! Disconnection occurred.
@@ -84,8 +97,9 @@
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				log( payload );
-				//updateBall(5,5);
+				//log( payload );
+				//slice payload to get info for ball
+				ProcessPayLoad(payload);
 			});
 
 			Server.connect();
@@ -103,8 +117,8 @@
 			context.beginPath();
 			context.fillStyle="#0000ff";
 			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
-			context.arc(x,y,2,0,Math.PI*2,true);
-			context.rect(x1,y1,5,20);
+			context.arc(xBall,yBall,2,0,Math.PI*2,true);
+			context.rect(xPaddle,yPaddle,5,20);
 			context.closePath();
 			context.fill();
 		}
@@ -118,15 +132,15 @@
 			switch (evt.keyCode) 
 			{
 			case 87:  /* Up arrow was pressed */
-				if (y1 - dy > -5)
+				if (yPaddle - dy > -5)
 				{ 
-					y1 -= dy;
+					yPaddle -= dy;
 				}
 				break;
 			case 83:  /* Down arrow was pressed */
-				if (y1 + dy < 135)
+				if (yPaddle + dy < 135)
 				{ 
-					y1 += dy;
+					yPaddle += dy;
 				}
 				break;
 			}
@@ -141,7 +155,7 @@
 	<div id='body1'>
         UserName: <input type='text' id='name' name='name'>
         <button type="button" id='cntBtn' onclick="connect();">Connect</button>
-		<button type="button" id='dcBtn' onclick="connect();">Disconnect</button>
+		<button type="button" id='dcBtn' onclick="disconnect();">Disconnect</button>
 		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
 		<input type='text' id='message' name='message' />
 	</div>
