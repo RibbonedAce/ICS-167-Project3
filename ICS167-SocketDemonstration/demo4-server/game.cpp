@@ -27,20 +27,20 @@ void game::removePlayer(int id) {
 void game::updateBall() {
 	this->ballPos.x += cos(this->ballDirection * M_PI / 180);
 	this->ballPos.y += sin(this->ballDirection * M_PI / 180);
-	if (this->ballPos.y > 1) {
+	if (this->ballPos.y > Y_BOUNDS || this->ballPos.y < 0) {
 		flipBallVertical();
 	}
-	else if (this->ballPos.y < -0.9) {
-		if (abs(this->ballPos.x - players[0].position) / 2 > 0.1) {
+	if (this->ballPos.x > X_BOUNDS) {
+		flipBallHorizontal();
+	}
+	else if (this->ballPos.x < PADDLE_OFFSET) {
+		if (abs(this->ballPos.y - players[0].position) > PADDLE_WIDTH / 2) {
 			stopGame();
 		}
 		else {
 			++this->players[0].score;
-			flipBallVertical();
+			flipBallHorizontal();
 		}
-	}
-	if (this->ballPos.x > 1 || this->ballPos.x < -1) {
-		flipBallHorizontal();
 	}
 }
 

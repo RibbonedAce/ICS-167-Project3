@@ -832,7 +832,7 @@ void webSocket::updateGame() {
 string webSocket::getGameStats() {
 	string result = to_string(pongGame->ballPos.x) + "," + to_string(pongGame->ballPos.y);
 	for (map<int, player>::iterator it = this->pongGame->players.begin(); it != this->pongGame->players.end(); ++it) {
-		result += ";" + to_string(it->first) + "," + to_string(it->second.position) + "," + to_string(it->second.score);
+		result += ";" + to_string(it->first) + "," + it->second.name + "," + to_string(it->second.position) + "," + to_string(it->second.score);
 	}
 	return result;
 }
