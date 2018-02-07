@@ -25,7 +25,7 @@
 			height: 500px;
 			background-color: white;
 			border: 1px solid black;
-			margin: 300px 20px;
+			margin: 20px 20px;
 		}
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -34,7 +34,7 @@
 		
 		var Server;
 		var x=150;
-		var y=75;
+		var y=150;
 		var x1 = 20;
 		var y1 = 20;
 		var dx=5;
@@ -64,7 +64,6 @@
 				if ( e.keyCode == 13 && this.value ) {
 					log( 'You: ' + this.value );
 					send( this.value );
-					send(uName.toString());
 					$(this).val('');
 				}
 			});
@@ -73,6 +72,7 @@
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
+				send("Name:" + uName.toString());
 			});
 
 			//OH NOES! Disconnection occurred.
@@ -152,7 +152,7 @@
 	<p id = "demo"></p>
 	<button id = "payload" onclick="myFunction()"> Print payload</button>
 </div>
-<canvas id = "myCanvas">
+<canvas id = "myCanvas" width="500" height="500">
 </canvas>
 </body>
 

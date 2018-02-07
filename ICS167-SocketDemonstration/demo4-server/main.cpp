@@ -52,7 +52,7 @@ void messageHandler(int clientID, string message)
 	string prefix = message.substr(0, message.find(':'));
 	if (prefix == "Name")
 	{
-		server.addPlayer(clientID, message.substr(message.find(':')));
+		server.addPlayer(clientID, message.substr(message.find(':') + 1));
 	}
 	else if (prefix == "Position")
 	{
@@ -78,9 +78,9 @@ void periodicHandler()
 
         vector<int> clientIDs = server.getClientIDs();
         for (int i = 0; i < clientIDs.size(); i++)
-            server.wsSend(clientIDs[i], os.str());
+            server.wsSend(clientIDs[i], os.str());*/
 
-        next = time(NULL) + 10;*/
+        next = time(NULL) + 1;
 		server.updateGame();
 		ostringstream os;
 		os << "Game:" << server.getGameStats();

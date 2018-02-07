@@ -1,5 +1,10 @@
 #define _USE_MATH_DEFINES
 
+#define X_BOUNDS 500
+#define Y_BOUNDS 500
+#define PADDLE_OFFSET 20
+#define PADDLE_WIDTH 20
+
 #include <map>
 #include <string>
 #include <vector>
