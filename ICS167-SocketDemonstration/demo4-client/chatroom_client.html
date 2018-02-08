@@ -33,16 +33,18 @@
 	<script>
 		
 		var Server;
-		var x=150;
-		var y=150;
-		var x1 = 20;
-		var y1 = 20;
+		var uName;
+		
+		var xBall=150;
+		var yBall=150;
+		
+		var xPaddle = 20;
+		var yPaddle = 0;
+		var paddleW = 5;
+		var paddleH = 20;
+		
 		var dx=5;
 		var dy=5;
-		var xBall = 150;
-		var yBall = 150;
-		var xPaddle = 20;
-		var yPaddle = 150;
 		
 		function log( text ) {
 			$log = $('#log');
@@ -54,10 +56,21 @@
 		
 		function ProcessPayLoad(text)
 		{
+			log(text);
 			var xP;
 			var yP;
 			var pLoad = text.split(":").pop();
 			
+			var index;
+			for(index = 0; index < pLoad.length; index++)
+			{
+				var temp = pLoad.charAt(index);
+				if(temp == ",")
+				{
+					xP = pLoad.substring(0,index);
+					yP = pLoad.substring(index + 1,pLoad.length);
+				}
+			}
 			updateBall(parseInt(xP),parseInt(yP));
 		}
 		function updateBall(xPos,yPos)
@@ -82,29 +95,36 @@
 			});
 		function disconnect()
 		{
-			log('Disconnect from server');
+			log('Disconnected from server');
+			Server.disconnect();
 		}
+		
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
-				let uName = document.getElementById("name").value;
+				uName = document.getElementById("name").value;
+				log("Username: " + uName);
 				send("Name:" + uName.toString());
 			});
 
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
-                document.getElementById("cntBtn").disabled = false;
+                document.getElementById("dcBtn").disabled = false;
 				log( "Disconnected." );
 			});
 
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				//log( payload );
-				//slice payload to get info for ball
-				log(payload);
-				ProcessPayLoad(payload);
+				if(payload.substring(0,8) == "Welcome!")
+				{
+					log( payload );
+				}
+				//log(payload);
+				//slice payload to get info for gamestate
+				if(payload.substring(0,4) == "Game")
+					ProcessPayLoad(payload);
 			});
 
 			Server.connect();
@@ -118,38 +138,34 @@
 
 		function draw()
 		{
-			context.clearRect(0,0,300,300);
+			context.clearRect(0,0,500,500);
 			context.beginPath();
 			context.fillStyle="#0000ff";
 			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
 			context.arc(xBall,yBall,2,0,Math.PI*2,true);
-			context.rect(xPaddle,yPaddle,5,20);
+			context.rect(xPaddle,yPaddle,paddleW,paddleH);
 			context.closePath();
 			context.fill();
-		}
-		
-		function clear() {
-			ctx.clearRect(0, 0, 500, 500);
 		}		
 		
 		function doKeyDown(evt)
 		{
 			switch (evt.keyCode) 
 			{
-			case 87:  /* Up arrow was pressed */
-				if (yPaddle - dy > -5)
+			case 87:  /* W was pressed */
+				if (yPaddle - dy >= 0)
 				{ 
 					yPaddle -= dy;
 				}
 				break;
-			case 83:  /* Down arrow was pressed */
-				if (yPaddle + dy < 135)
+			case 83:  /* S was pressed */
+				if (yPaddle + dy <= 480)
 				{ 
 					yPaddle += dy;
 				}
 				break;
 			}
-			Server.send("Position:" + y1.toString());
+			Server.send("Position:" + xPaddle.toString() + "," + yPaddle.toString());
 		}
 		window.addEventListener('keydown',doKeyDown,true);
 	</script>

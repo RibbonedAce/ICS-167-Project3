@@ -64,7 +64,7 @@ void messageHandler(int clientID, string message)
 /* called once per select() loop */
 void periodicHandler()
 {
-    static time_t next = time(NULL) + 10;
+    static time_t next = time(NULL) + 1;
     time_t current = time(NULL);
     if (current >= next)
 	{
