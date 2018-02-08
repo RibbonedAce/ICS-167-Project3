@@ -759,6 +759,8 @@ void webSocket::startServer(int port){
             nextPingTime = time(NULL) + 1;
         }
 
+		this->updateGame();
+
         if (callPeriodic != NULL)
             callPeriodic();
     }

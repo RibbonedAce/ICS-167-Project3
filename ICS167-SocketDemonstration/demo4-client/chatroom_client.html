@@ -56,7 +56,7 @@
 		
 		function ProcessPayLoad(text)
 		{
-			log(text);
+			//log(text);
 			var xP;
 			var yP;
 			var pLoad = text.split(":").pop();
@@ -117,10 +117,10 @@
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				if(payload.substring(0,8) == "Welcome!")
+				/*if(payload.substring(0,8) == "Welcome!")
 				{
 					log( payload );
-				}
+				}*/
 				//log(payload);
 				//slice payload to get info for gamestate
 				if(payload.substring(0,4) == "Game")

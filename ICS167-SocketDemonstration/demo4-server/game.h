@@ -29,8 +29,8 @@ public:
 	
 	game() {
 		players = map<int, player>();
-		ballPos.x = 0;
-		ballPos.y = 0;
+		ballPos.x = 250;
+		ballPos.y = 250;
 		ballDirection = rand() % 360;
 		maxScore = SCORE_LIMIT;
 	}

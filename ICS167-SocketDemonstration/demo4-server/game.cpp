@@ -56,8 +56,8 @@ void game::stopGame() {
 		it->second.score = 0;
 		it->second.position = 0;
 	}
-	ballPos.x = 0;
-	ballPos.y = 0;
+	ballPos.x = 250;
+	ballPos.y = 250;
 }
 
 void game::flipBallVertical() {

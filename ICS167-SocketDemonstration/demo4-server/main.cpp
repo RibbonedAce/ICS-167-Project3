@@ -64,7 +64,7 @@ void messageHandler(int clientID, string message)
 /* called once per select() loop */
 void periodicHandler()
 {
-    static time_t next = time(NULL) + 1;
+    static time_t next = time(NULL) + 5;
     time_t current = time(NULL);
     if (current >= next)
 	{
@@ -80,8 +80,7 @@ void periodicHandler()
         for (int i = 0; i < clientIDs.size(); i++)
             server.wsSend(clientIDs[i], os.str());*/
 
-        next = time(NULL) + 1;
-		server.updateGame();
+        //next = time(NULL) + 1;
 		ostringstream os;
 		os << "Game:" << server.getGameStats();
 		vector<int> clientIDs = server.getClientIDs();
