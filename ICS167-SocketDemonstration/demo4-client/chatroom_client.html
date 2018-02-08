@@ -17,15 +17,14 @@
 		}
         #ip {line-height:20px}
         #port {line-height:20px}
-		#body1 {width:450px; float: left; border: 1px solid black}
+		#body1 {width:450px; float: left}
 		#log {width:400px;height:200px}
 		#message {width:400px;height:20px}
 		#myCanvas{
-			width: 500px;
-			height: 500px;
+
 			background-color: white;
 			border: 1px solid black;
-			margin: 20px 20px;
+			margin: auto;
 		}
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -65,7 +64,13 @@
 			var res = pLoad.split(";");
 			Pos = res[0].split(",");
 			updateBall(parseInt(Pos[0]),parseInt(Pos[1]));
+			Pos = res[1].split(",");
+			updateScore(Pos[3]);
 			//log(res[1]);
+		}
+		function updateScore(score)
+		{
+			document.getElementById("left-score").innerHTML = score;
 		}
 		function updateBall(xPos,yPos)
 		{
@@ -181,12 +186,7 @@
 		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
 		<input type='text' id='message' name='message' />
 	</div>
-	<div id ='body2'>
-		<div class ="ball" id = "ball"></div>
-		<div class ="paddle" id = "bottomPaddle"></div>
-	</div>
-	<p id = "demo"></p>
-	<button id = "payload" onclick="myFunction()"> Print payload</button>
+	Score: <p class="score" id="left-score">0</p>
 </div>
 <canvas id = "myCanvas" width="500" height="500">
 </canvas>
