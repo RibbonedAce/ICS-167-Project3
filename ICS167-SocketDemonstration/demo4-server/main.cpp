@@ -41,7 +41,6 @@ void closeHandler(int clientID){
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
-	printf("%s", message);
     ostringstream os;
     os << "Stranger " << clientID << " says: " << message;
 
@@ -83,12 +82,7 @@ void periodicHandler()
             server.wsSend(clientIDs[i], os.str());*/
 
         //next = time(NULL) + 1;
-		ostringstream os;
-		os << "Game:" << server.getGameStats();
-		vector<int> clientIDs = server.getClientIDs();
-		for (int i = 0; i < clientIDs.size(); i++) {
-			server.wsSend(clientIDs[i], os.str());
-		}
+		
     }
 
 	
@@ -100,7 +94,7 @@ int main(int argc, char *argv[]){
     server.setOpenHandler(openHandler);
     server.setCloseHandler(closeHandler);
     server.setMessageHandler(messageHandler);
-    server.setPeriodicHandler(periodicHandler);
+    //server.setPeriodicHandler(periodicHandler);
 
     /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
     server.startServer(PORT1);

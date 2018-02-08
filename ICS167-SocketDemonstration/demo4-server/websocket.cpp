@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -760,6 +761,14 @@ void webSocket::startServer(int port){
         }
 
 		this->updateGame();
+		ostringstream os;
+		os << "Game:" << this->getGameStats();
+		vector<int> clientIDs = this->getClientIDs();
+		for (int i = 0; i < clientIDs.size(); i++) {
+			if (time(NULL) >= wsClients[i]->startTime + 1) {
+				this->wsSend(clientIDs[i], os.str());
+			}
+		}
 
         if (callPeriodic != NULL)
             callPeriodic();

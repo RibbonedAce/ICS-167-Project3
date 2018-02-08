@@ -54,6 +54,7 @@ public:
     wsClient(int _socket, in_addr _addr){
         socket = _socket;
         MessageBuffer.clear();
+		startTime = time(NULL);
         ReadyState = WS_READY_STATE_CONNECTING;
         LastRecvTime = time(NULL);
         PingSentTime = 0;
@@ -69,6 +70,7 @@ public:
 	int consectHits;					   // number of hits client can do without missing.
     int socket;                            // client socket
     string MessageBuffer;                  // a blank string when there's no incoming frames
+	time_t startTime;
     int ReadyState;                        // between 0 and 3
     time_t LastRecvTime;                   // set to time() when the client is added
     time_t PingSentTime;                   // 0 when the server is not waiting for a pong
