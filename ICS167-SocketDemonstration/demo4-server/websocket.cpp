@@ -828,7 +828,7 @@ void webSocket::editPlayerPos(int index, float _position) {
 
 void webSocket::addPlayer(int id, string _name) {
 	this->pongGame->addPlayer(id, _name);
-	if (this->pongGame->players.size() >= MAX_CLIENTS) {
+	if (this->getNumOfPlayers() >= MAX_CLIENTS) {
 		this->startGame();
 	}
 }
