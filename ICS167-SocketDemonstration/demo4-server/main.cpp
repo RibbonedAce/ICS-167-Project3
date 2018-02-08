@@ -41,6 +41,7 @@ void closeHandler(int clientID){
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
+	printf("%s", message);
     ostringstream os;
     os << "Stranger " << clientID << " says: " << message;
 
@@ -56,6 +57,7 @@ void messageHandler(int clientID, string message)
 	}
 	else if (prefix == "Position")
 	{
+		printf("%s", message.substr(message.find(':') + 1));
 		float newPos = stof(message.substr(message.find(':') + 1));
 		server.editPlayerPos(clientID, newPos);
 	}
@@ -64,7 +66,7 @@ void messageHandler(int clientID, string message)
 /* called once per select() loop */
 void periodicHandler()
 {
-    static time_t next = time(NULL) + 5;
+    static time_t next = time(NULL) + 10;
     time_t current = time(NULL);
     if (current >= next)
 	{

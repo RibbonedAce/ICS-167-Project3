@@ -15,7 +15,7 @@ using namespace std;
 void game::addPlayer(int id, string _name) {
 	player toAdd;
 	toAdd.name = _name;
-	toAdd.position = 0;
+	toAdd.position = 250;
 	toAdd.score = 0;
 	players[id] = toAdd;
 }
@@ -54,7 +54,7 @@ void game::changeScore(int index, int toAdd) {
 void game::stopGame() {
 	for (map<int,player>::iterator it = this->players.begin(); it != this->players.end(); ++it) {
 		it->second.score = 0;
-		it->second.position = 0;
+		it->second.position = 250;
 	}
 	ballPos.x = 250;
 	ballPos.y = 250;
