@@ -33,6 +33,7 @@
 	<script>
 		
 		var Server;
+		var uName;
 		var xBall=150;
 		var yBall=150;
 		var xPaddle = 20;
@@ -50,6 +51,7 @@
 		
 		function ProcessPayLoad(text)
 		{
+			log(text);
 			var xP;
 			var yP;
 			var pLoad = text.split(":").pop();
@@ -88,12 +90,15 @@
 			});
 		function disconnect()
 		{
-			log('Disconnect from server');
+			log('Disconnected from server');
 		}
+		
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
+				uName = document.getElementById("name").value;
+				log("Username: " + uName);
 				send("Name:" + uName.toString());
 			});
 
@@ -106,10 +111,14 @@
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				log( payload );
-				
+				if(payload.substring(0,8) == "Welcome!")
+				{
+					log( payload );
+				}
+				//log(payload);
 				//slice payload to get info for gamestate
-				ProcessPayLoad(payload);
+				if(payload.substring(0,4) == "Game")
+					ProcessPayLoad(payload);
 			});
 
 			Server.connect();
