@@ -91,6 +91,7 @@
 		function disconnect()
 		{
 			log('Disconnected from server');
+			Server.disconnect();
 		}
 		
 			//Let the user know we're connected
@@ -104,7 +105,7 @@
 
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
-                document.getElementById("cntBtn").disabled = false;
+                document.getElementById("dcBtn").disabled = false;
 				log( "Disconnected." );
 			});
 
@@ -159,7 +160,7 @@
 				}
 				break;
 			}
-			Server.send("Position:" + yPaddle.toString());
+			Server.send("Position:" + xPaddle.toString() + "," + yPaddle.toString());
 		}
 		window.addEventListener('keydown',doKeyDown,true);
 	</script>
