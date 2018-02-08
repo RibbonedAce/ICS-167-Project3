@@ -56,16 +56,14 @@
 		
 		function ProcessPayLoad(text)
 		{
-			var xP;
-			var yP;
+			var Pos;
 			var pLoad = text.split(":").pop();
 			
 			var index;
 			var res = pLoad.split(";");
-			log(res);
-			xP = res[0].split(",");
-			log(xP.toString());
-			updateBall(parseInt(xP[0]),parseInt(x[1]));
+			Pos = res[0].split(",");
+			updateBall(parseInt(Pos[0]),parseInt(Pos[1]));
+			log(res[1]);
 		}
 		function updateBall(xPos,yPos)
 		{
