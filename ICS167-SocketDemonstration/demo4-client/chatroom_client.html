@@ -34,10 +34,15 @@
 		
 		var Server;
 		var uName;
+		
 		var xBall=150;
 		var yBall=150;
+		
 		var xPaddle = 20;
-		var yPaddle = 20;
+		var yPaddle = 0;
+		var paddleW = 5;
+		var paddleH = 20;
+		
 		var dx=5;
 		var dy=5;
 		
@@ -138,7 +143,7 @@
 			context.fillStyle="#0000ff";
 			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
 			context.arc(xBall,yBall,2,0,Math.PI*2,true);
-			context.rect(xPaddle,yPaddle,5,20);
+			context.rect(xPaddle,yPaddle,paddleW,paddleH);
 			context.closePath();
 			context.fill();
 		}		
@@ -147,14 +152,14 @@
 		{
 			switch (evt.keyCode) 
 			{
-			case 87:  /* Up arrow was pressed */
-				if (yPaddle - dy > -5)
+			case 87:  /* W was pressed */
+				if (yPaddle - dy >= 0)
 				{ 
 					yPaddle -= dy;
 				}
 				break;
-			case 83:  /* Down arrow was pressed */
-				if (yPaddle + dy < 485)
+			case 83:  /* S was pressed */
+				if (yPaddle + dy <= 480)
 				{ 
 					yPaddle += dy;
 				}
