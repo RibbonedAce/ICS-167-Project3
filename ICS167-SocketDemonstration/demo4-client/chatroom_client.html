@@ -87,11 +87,7 @@
 					$(this).val('');
 				}
 			});
-		function disconnect()
-		{
-			log('Disconnected from server');
-			Server.disconnect();
-		}
+		
 		
 			//Let the user know we're connected
 			Server.bind('open', function() {
@@ -124,6 +120,13 @@
 
 			Server.connect();
         }
+		
+		function disconnect()
+		{
+			log('Disconnected from server');
+			Server.disconnect();
+		}
+		
 		function init()
 		{
 			context= myCanvas.getContext('2d');
