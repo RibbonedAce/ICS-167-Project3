@@ -34,7 +34,7 @@ void game::updateBall() {
 		flipBallHorizontal();
 	}
 	else if (this->ballPos.x < PADDLE_OFFSET) {
-		if (abs(this->ballPos.y - players[0].position) > PADDLE_WIDTH / 2) {
+		if (this->ballPos.y - players[0].position > PADDLE_WIDTH || this->ballPos.y - players[0].position < 0) {
 			stopGame();
 		}
 		else {
