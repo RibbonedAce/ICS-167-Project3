@@ -56,7 +56,7 @@ void messageHandler(int clientID, string message)
 	}
 	else if (prefix == "Position")
 	{
-		float newPos = stof(message);
+		float newPos = stof(message.substr(message.find(':') + 1));
 		server.editPlayerPos(clientID, newPos);
 	}
 }
