@@ -39,6 +39,10 @@
 		var y1 = 20;
 		var dx=5;
 		var dy=5;
+		var xBall = 150;
+		var yBall = 150;
+		var xPaddle = 20;
+		var yPaddle = 150;
 		
 		function log( text ) {
 			$log = $('#log');
@@ -84,6 +88,7 @@
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
+				let uName = document.getElementById("name").value;
 				send("Name:" + uName.toString());
 			});
 
@@ -98,6 +103,7 @@
 			{
 				//log( payload );
 				//slice payload to get info for ball
+				log(payload);
 				ProcessPayLoad(payload);
 			});
 

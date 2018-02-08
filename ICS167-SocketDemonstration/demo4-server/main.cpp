@@ -12,14 +12,14 @@ webSocket server;
 
 /* called when a client connects */
 void openHandler(int clientID){
-    ostringstream os;
+    /*ostringstream os;
     os << "Stranger " << clientID << " has joined.";
 
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
-    }
+    }*/
     server.wsSend(clientID, "Welcome!");
 }
 
