@@ -106,7 +106,7 @@
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				//log( payload );
+				log( payload );
 				
 				//slice payload to get info for gamestate
 				ProcessPayLoad(payload);
@@ -123,7 +123,7 @@
 
 		function draw()
 		{
-			context.clearRect(0,0,300,300);
+			context.clearRect(0,0,500,500);
 			context.beginPath();
 			context.fillStyle="#0000ff";
 			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
@@ -131,10 +131,6 @@
 			context.rect(xPaddle,yPaddle,5,20);
 			context.closePath();
 			context.fill();
-		}
-		
-		function clear() {
-			ctx.clearRect(0, 0, 500, 500);
 		}		
 		
 		function doKeyDown(evt)
@@ -148,7 +144,7 @@
 				}
 				break;
 			case 83:  /* Down arrow was pressed */
-				if (yPaddle + dy < 135)
+				if (yPaddle + dy < 485)
 				{ 
 					yPaddle += dy;
 				}

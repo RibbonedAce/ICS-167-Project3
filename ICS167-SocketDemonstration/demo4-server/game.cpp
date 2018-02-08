@@ -30,7 +30,7 @@ void game::updateBall() {
 	if (this->ballPos.y > Y_BOUNDS || this->ballPos.y < 0) {
 		flipBallVertical();
 	}
-	if (this->ballPos.x > X_BOUNDS) {
+	if (this->ballPos.x > X_BOUNDS || this->ballPos.x < 0) {
 		flipBallHorizontal();
 	}
 	else if (this->ballPos.x < PADDLE_OFFSET) {
