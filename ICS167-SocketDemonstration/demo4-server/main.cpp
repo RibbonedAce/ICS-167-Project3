@@ -54,7 +54,6 @@ void messageHandler(int clientID, string message)
 	}
 	else if (prefix == "Position")
 	{
-		printf("%s", message.substr(message.find(':') + 1));
 		float newPos = stof(message.substr(message.find(':') + 1));
 		server.editPlayerPos(clientID, newPos);
 	}

@@ -7,19 +7,19 @@
 			width: 100%;
 			margin: auto;
 		}
-		input,textarea
+		<!--input,textarea
 		{
 			border:1px solid #CCC;
 			width: 100px;
 			height:20px;
 			margin-left:0px;
 			padding:0px
-		}
+		}-->
         #ip {line-height:20px}
         #port {line-height:20px}
 		#body1 {width:450px; float: left}
-		#log {width:400px;height:200px}
-		#message {width:400px;height:20px}
+		<!-- #log {width:400px;height:200px} -->
+		<!-- #message {width:400px;height:20px} -->
 		#myCanvas{
 
 			background-color: white;
@@ -37,23 +37,23 @@
 		var xBall=150;
 		var yBall=150;
 		
-		var xPaddle = 20;
+		var xPaddle = 10;
 		var yPaddle = 250;
-		var paddleW = 5;
-		var paddleH = 20;
+		var paddleW = 10;
+		var paddleH = 120;
 		
 		var dx=5;
 		var dy=5;
 		
 		var connected = false;
 		
-		function log( text ) {
+		/*function log( text ) {
 			$log = $('#log');
 			//Add text to log
 			$log.append(($log.val()?"\n":'')+text);
 			//Autoscroll
 			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
-		}
+		}*/
 		
 		function ProcessPayLoad(text)
 		{
@@ -65,12 +65,12 @@
 			Pos = res[0].split(",");
 			updateBall(parseInt(Pos[0]),parseInt(Pos[1]));
 			Pos = res[1].split(",");
-			updateScore(Pos[3]);
+			updateScore(Pos[1], Pos[3]);
 			//log(res[1]);
 		}
-		function updateScore(score)
+		function updateScore(name, score)
 		{
-			document.getElementById("left-score").innerHTML = score;
+			document.getElementById("left-score").innerHTML = name + ": " + score;
 		}
 		function updateBall(xPos,yPos)
 		{
@@ -82,8 +82,8 @@
 		}
 
         function connect(){
-            log('Connecting...');
-			Server = new FancyWebSocket('ws://' + '127.0.0.1:8082');
+            //log('Connecting...');
+			Server = new FancyWebSocket('ws://' + document.getElementById("ip").value + ":" + document.getElementById("port").value);
 			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
@@ -97,9 +97,9 @@
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
-				log( "Connected." );
+				//log( "Connected." );
 				uName = document.getElementById("name").value;
-				log("Username: " + uName);
+				//log("Username: " + uName);
 				send("Name:" + uName.toString());
 				connected = true;
 			});
@@ -107,7 +107,7 @@
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
                 document.getElementById("cntBtn").disabled = false;
-				log( "Disconnected." );
+				//log( "Disconnected." );
 			});
 
 			//Log any messages sent from server
@@ -115,7 +115,7 @@
 			{
 				if(payload.substring(0,8) == "Welcome!")
 				{
-					log( payload );
+					//log( payload );
 				}
 				//log(payload);
 				//slice payload to get info for gamestate
@@ -128,7 +128,9 @@
 		
 		function disconnect()
 		{
-			log('Disconnected from server');
+			//log('Disconnected from server');
+			connected = false;
+			yPaddle = 250;
 			Server.disconnect();
 		}
 		
@@ -141,11 +143,11 @@
 
 		function draw()
 		{
-			context.clearRect(0,0,500,500);
+			context.clearRect(0,0,550,550);
 			context.beginPath();
 			context.fillStyle="#0000ff";
 			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
-			context.arc(xBall,yBall,2,0,Math.PI*2,true);
+			context.arc(xBall,yBall,10,0,Math.PI*2,true);
 			context.rect(xPaddle,yPaddle,paddleW,paddleH);
 			context.closePath();
 			context.fill();
@@ -164,7 +166,7 @@
 					}
 					break;
 				case 83:  /* S was pressed */
-					if (yPaddle + dy <= 480)
+					if (yPaddle + dy <= document.getElementById("myCanvas").height - paddleH)
 					{ 
 						yPaddle += dy;
 					}
@@ -180,16 +182,16 @@
 <body onload = "init();">
 <div id = 'container'>
 	<div id='body1'>
+		Server ip: <input type='text' id='ip' name='ip'>
+        Server port: <input type='text' id='port' name='port'>
         UserName: <input type='text' id='name' name='name'>
         <button type="button" id='cntBtn' onclick="connect();">Connect</button>
 		<button type="button" id='dcBtn' onclick="disconnect();">Disconnect</button>
-		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
-		<input type='text' id='message' name='message' />
 	</div>
-	Score: <p class="score" id="left-score">0</p>
+		<p class="score" id="left-score"></p>
+		<canvas id = "myCanvas" width="550" height="550"></canvas>
 </div>
-<canvas id = "myCanvas" width="500" height="500">
-</canvas>
 </body>
+
 
 </html>

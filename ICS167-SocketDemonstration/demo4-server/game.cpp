@@ -50,19 +50,19 @@ void game::updateBall() {
 		this->lastBallPos.y = ballPos.y;
 		this->ballPos.x += cos(this->ballDirection * M_PI / 180);
 		this->ballPos.y += sin(this->ballDirection * M_PI / 180);
-		if (this->ballPos.y > Y_BOUNDS || this->ballPos.y < 0) {
+		if (this->ballPos.y + BALL_RADIUS > Y_BOUNDS || this->ballPos.y - BALL_RADIUS < 0) {
 			flipBallVertical();
 		}
-		if (this->ballPos.x > X_BOUNDS || this->ballPos.x < 0) {
+		if (this->ballPos.x + BALL_RADIUS > X_BOUNDS) {
 			flipBallHorizontal();
 		}
-		else if (this->ballPos.x < PADDLE_OFFSET + PADDLE_WIDTH / 2 && this->lastBallPos.x >= PADDLE_OFFSET + PADDLE_WIDTH / 2) {
-			if (abs(this->ballPos.y - players[0].position <= PADDLE_LENGTH / 2)) {
+		else if (this->ballPos.x - BALL_RADIUS < PADDLE_OFFSET + PADDLE_WIDTH && this->lastBallPos.x - BALL_RADIUS >= PADDLE_OFFSET + PADDLE_WIDTH) {
+			if (this->ballPos.y - players[0].position > 0 && this->ballPos.y - players[0].position < PADDLE_LENGTH) {
 				++this->players[0].score;
 				flipBallHorizontal();
 			}
 		}
-		else if (this->ballPos.x < 0) {
+		else if (this->ballPos.x - BALL_RADIUS < 0) {
 			stopGame();
 		}
 	}
