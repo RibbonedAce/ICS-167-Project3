@@ -22,12 +22,14 @@ struct player {
 
 class game {
 public:
+	bool running;
 	map<int, player> players;
 	xyCoords ballPos;
 	int ballDirection;
 	int maxScore;
 	
 	game() {
+		running = false;
 		players = map<int, player>();
 		ballPos.x = 250;
 		ballPos.y = 250;
@@ -37,11 +39,15 @@ public:
 
 	void addPlayer(int id, string _name);
 	void removePlayer(int id);
+	int getNumOfPlayers();
 	void updateBall();
 	void changeScore(int index, int toAdd);
+	void startGame();
 	void stopGame();
 
 private:
+	xyCoords lastBallPos;
+
 	void flipBallVertical();
 	void flipBallHorizontal();
 };

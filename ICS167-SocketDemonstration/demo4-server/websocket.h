@@ -98,11 +98,9 @@ public:
     void setPeriodicHandler(nullCallback callback);
     void startServer(int port);
     void stopServer();
-	void startGame();
-	void endGame();
-	int getNumOfPlayers();
 	bool gameIsPlaying();
 	void addPlayer(int id, string _name);
+	void removePlayer(int id);
 	void editPlayerPos(int index, float _position);
 	void updateGame();
 	string getGameStats();

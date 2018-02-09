@@ -679,7 +679,6 @@ void webSocket::startServer(int port){
     showAvailableIP();
 
 	this->pongGame = new game();
-	this->runningGame = false;
 
     int yes = 1;
     char buf[4096];
@@ -726,7 +725,7 @@ void webSocket::startServer(int port){
         if (select(fdmax+1, &read_fds, NULL, NULL, &timeout) > 0){
             for (int i = 0; i <= fdmax; i++){
                 if (FD_ISSET(i, &read_fds)){
-                    if (i == listenfd && this->getNumOfPlayers() < MAX_CLIENTS){
+                    if (i == listenfd && this->pongGame->getNumOfPlayers() < MAX_CLIENTS){
                         socklen_t addrlen = sizeof(cli_addr);
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
                         if (newfd != -1){
@@ -799,27 +798,8 @@ void webSocket::stopServer(){
     fdmax = 0;
 }
 
-void webSocket::startGame() {
-	this->runningGame = true;
-}
-
-void webSocket::endGame() {
-	this->runningGame = false;
-	this->pongGame->stopGame();
-}
-
-int webSocket::getNumOfPlayers() {
-	int result = 0;
-	for (auto& i : this->wsClients) {
-		if (i != NULL) {
-			++result;
-		}
-	}
-	return result;
-}
-
 bool webSocket::gameIsPlaying() {
-	return this->runningGame;
+	return this->pongGame->running;
 }
 
 void webSocket::editPlayerPos(int index, float _position) {
@@ -828,16 +808,14 @@ void webSocket::editPlayerPos(int index, float _position) {
 
 void webSocket::addPlayer(int id, string _name) {
 	this->pongGame->addPlayer(id, _name);
-	if (this->getNumOfPlayers() >= MAX_CLIENTS) {
-		this->startGame();
-	}
+}
+
+void webSocket::removePlayer(int id) {
+	this->pongGame->removePlayer(id);
 }
 
 void webSocket::updateGame() {
-	if (runningGame)
-	{
-		pongGame->updateBall();
-	}
+	pongGame->updateBall();
 }
 
 string webSocket::getGameStats() {
