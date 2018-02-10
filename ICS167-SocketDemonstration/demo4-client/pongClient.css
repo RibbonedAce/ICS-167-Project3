@@ -1,0 +1,38 @@
+.serverContainer > div {
+    display: inline-block;
+    display: -moz-inline-box;
+    *display: inline; /* For IE7 */
+    zoom: 1; /* Trigger hasLayout */
+    width: 16%;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+.playerContainer > div {
+    display: inline-block;
+    display: -moz-inline-box;
+    *display: inline; /* For IE7 */
+    zoom: 1; /* Trigger hasLayout */
+    width: 11%;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+.gameContainer > div {
+    display: inline-block;
+    display: -moz-inline-box;
+    *display: inline; /* For IE7 */
+    zoom: 1; /* Trigger hasLayout */
+    width: 20%;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+.square{
+    width: 10px;
+    height: 10px;
+    Background-color: #FFFFFF;
+}

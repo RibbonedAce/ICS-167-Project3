@@ -1,59 +1,93 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+<title>
+    Multiplayer Pong
+</title>
 <head>
-	<meta charset='UTF-8' />
-	<style>
-		#container{
-			width: 100%;
-			margin: auto;
-		}
-		<!--input,textarea
-		{
-			border:1px solid #CCC;
-			width: 100px;
-			height:20px;
-			margin-left:0px;
-			padding:0px
-		}-->
-        #ip {line-height:20px}
-        #port {line-height:20px}
-		#body1 {width:450px; float: left}
-		<!-- #log {width:400px;height:200px} -->
-		<!-- #message {width:400px;height:20px} -->
-		#myCanvas{
-
-			background-color: white;
-			border: 1px solid black;
-			margin: auto;
-		}
-	</style>
+    <link rel="stylesheet" type="text/css" href="pongClient.css">
+</head>
+<center><body>  
+    
+    <div class="serverContainer">
+        <div>IP: <input type="text" name="ip" value="127.0.0.1" id="ipEntry"></div>
+        <div>Port: <input type="text" name="port" value="15000" id="portEntry"></div>
+        <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
+        <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
+    </div>
+    
+    <div class="playerContainer">
+        <div><label type="text" name="p1Score" id="score1"> </label></div>
+        <div><label type="text" name="p2Score" id="score2"> </label></div>
+        <div><label type="text" name="p3Score" id="score3"> </label></div>
+        <div><label type="text" name="p4Score" id="score4"> </label></div>
+    </div>
+    
+    <div class="playerContainer">
+        <div class="square" name="p1Color" id="color1"></div>
+        <div class="square" name="p2Color" id="color2"></div>
+        <div class="square" name="p3Color" id="color3"></div>
+        <div class="square" name="p4Color" id="color4"></div>
+    </div>
+    
+    <div style="padding-top: 5px; padding-bottom: 5px;">
+        <canvas id="gameCanvas" width="550" height="550" style="border:5px solid black;"></canvas>
+    </div> 
+    
+<!--
+    <div>
+        <div><button type="button" onclick="ready();" id='readyButton'>Ready</button></div>
+    </div>
+-->
+    
+    <div style="padding-top: 5px; padding-bottom: 5px;">
+        <label type="text" name="updates" id="updateBar">Welcome to Multiplayer Pong</label>
+    </div>
+    
+</body></center> 
+    
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
 	<script>
 		
+        var myGamePiece;
+        var gameBall;
+        
 		var Server;
 		var uName;
+        var score = 0;
 		
-		var xBall=150;
-		var yBall=150;
+		var xBall=275;
+		var yBall=275;
 		
-		var xPaddle = 10;
-		var yPaddle = 250;
+		var xPaddle = 20;
+		var yPaddle = 0;
 		var paddleW = 10;
 		var paddleH = 120;
+        var paddleColor = "#ffffff";
 		
 		var dx=5;
 		var dy=5;
-		
-		var connected = false;
-		
-		/*function log( text ) {
-			$log = $('#log');
-			//Add text to log
-			$log.append(($log.val()?"\n":'')+text);
-			//Autoscroll
-			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
-		}*/
+        
+        var myGameArea = {
+            canvas : document.getElementById("gameCanvas") ,
+            start : function() {
+                //this.canvas.width = 480;
+                //this.canvas.height = 270;
+                this.context = this.canvas.getContext("2d");
+                //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.interval = setInterval(updateGameArea, 20);
+                window.addEventListener('keydown', function (e) {
+                    myGameArea.key = e.keyCode;
+                })
+                window.addEventListener('keyup', function (e) {
+                    myGameArea.key = false;
+                })
+            }, 
+            clear : function(){
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+        
 		
 		function ProcessPayLoad(text)
 		{
@@ -63,60 +97,45 @@
 			var index;
 			var res = pLoad.split(";");
 			Pos = res[0].split(",");
-			updateBall(parseInt(Pos[0]),parseInt(Pos[1]));
-			Pos = res[1].split(",");
-			updateScore(Pos[1], Pos[3]);
-			//log(res[1]);
+            xBall = parseInt(Pos[0]);
+            yBall = parseInt(Pos[1]);
+            gameBall.newPos(xBall, yBall);
+            gameBall.update();
+            score = res[1].split(",")[3];
 		}
-		function updateScore(name, score)
-		{
-			document.getElementById("left-score").innerHTML = name + ": " + score;
-		}
-		function updateBall(xPos,yPos)
-		{
-			xBall = xPos;
-			yBall = yPos;
-		}
+        
+        
 		function send( text ) {
 			Server.send( 'message', text );
 		}
 
         function connect(){
-            //log('Connecting...');
-			Server = new FancyWebSocket('ws://' + document.getElementById("ip").value + ":" + document.getElementById("port").value);
+            
+			Server = new FancyWebSocket('ws://' + ip + ":" + port);
 			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
-					log( 'You: ' + this.value );
 					send( this.value );
 					$(this).val('');
 				}
 			});
 		
-		
+        
 			//Let the user know we're connected
 			Server.bind('open', function() {
-                document.getElementById("cntBtn").disabled = true;
-				//log( "Connected." );
-				uName = document.getElementById("name").value;
-				//log("Username: " + uName);
+                document.getElementById("connectButton").disabled = true;
+				uName = document.getElementById("nameEntry").value;
 				send("Name:" + uName.toString());
-				connected = true;
 			});
 
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
-                document.getElementById("cntBtn").disabled = false;
-				//log( "Disconnected." );
+                document.getElementById("connectButton").disabled = false;
 			});
 
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				if(payload.substring(0,8) == "Welcome!")
-				{
-					//log( payload );
-				}
 				//log(payload);
 				//slice payload to get info for gamestate
 				if(payload.substring(0,4) == "Game")
@@ -124,74 +143,77 @@
 			});
 
 			Server.connect();
+            myGameArea.start();
+            paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+            if ( paddleColor == "#ffffff"){
+                paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+            }
+            myGamePiece = new paddle(paddleW, paddleH, paddleColor, xPaddle, yPaddle);
+            gameBall = new ball();
+            document.getElementById("score1").innerHTML = uName + ": " + score;
+            document.getElementById("color1").style.backgroundColor = paddleColor;
         }
-		
-		function disconnect()
+        
+        function disconnect()
 		{
-			//log('Disconnected from server');
-			connected = false;
-			yPaddle = 250;
 			Server.disconnect();
 		}
-		
-		function init()
-		{
-			context= myCanvas.getContext('2d');
-			draw();
-			return setInterval(draw,10);
-		}
-
-		function draw()
-		{
-			context.clearRect(0,0,550,550);
-			context.beginPath();
-			context.fillStyle="#0000ff";
-			// Draws a circle of radius 20 at the coordinates 100,100 on the canvas
-			context.arc(xBall,yBall,10,0,Math.PI*2,true);
-			context.rect(xPaddle,yPaddle,paddleW,paddleH);
-			context.closePath();
-			context.fill();
-		}		
-		
-		function doKeyDown(evt)
-		{
-			if (connected)
-			{
-				switch (evt.keyCode) 
-				{
-				case 87:  /* W was pressed */
-					if (yPaddle - dy >= 0)
-					{ 
-						yPaddle -= dy;
-					}
-					break;
-				case 83:  /* S was pressed */
-					if (yPaddle + dy <= document.getElementById("myCanvas").height - paddleH)
-					{ 
-						yPaddle += dy;
-					}
-					break;
-				}
-				send("Position:" + yPaddle.toString());
-			}
-		}
-		window.addEventListener('keydown',doKeyDown,true);
+        
+        
+        
+        function paddle(width, height, color, x, y) {
+            this.gamearea = myGameArea;
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.speedY = 0; 
+            this.x = x;
+            this.y = y;    
+            this.update = function() {
+                ctx = myGameArea.context;
+                ctx.fillStyle = color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+            this.newPos = function() {
+                this.x += this.speedX;
+                this.y += this.speedY; 
+                send("Position:"+this.y.toString());
+            }
+        }
+        
+        function ball() {
+            this.gamearea = myGameArea;  
+            this.x = 275
+            this.y = 275
+            this.update = function() {
+                ctx = myGameArea.context;
+                ctx.beginPath();
+                ctx.fillStyle="#ff0000";
+                ctx.arc(this.x,this.y,10,0,Math.PI*2,true);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            this.newPos = function(x, y) {
+                this.x = x;
+                this.y = y; 
+                console.log(this.x + ", " + this.y);
+            }
+        }
+        
+        function updateGameArea() {
+            myGameArea.clear();
+            myGamePiece.speedX = 0;
+            myGamePiece.speedY = 0;
+            //if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -2; }
+            //if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 2; }
+            if (myGameArea.key && myGameArea.key == 38 && myGamePiece.y > 20) {myGamePiece.speedY = -2; }
+            if (myGameArea.key && myGameArea.key == 40 && myGamePiece.y < 410) {myGamePiece.speedY = 2; }
+            gameBall.newPos(xBall, yBall);
+            gameBall.update();
+            myGamePiece.newPos();    
+            myGamePiece.update();
+            document.getElementById("score1").innerHTML = uName + ": " + score;
+        }
 	</script>
-</head>
-
-<body onload = "init();">
-<div id = 'container'>
-	<div id='body1'>
-		Server ip: <input type='text' id='ip' name='ip'>
-        Server port: <input type='text' id='port' name='port'>
-        UserName: <input type='text' id='name' name='name'>
-        <button type="button" id='cntBtn' onclick="connect();">Connect</button>
-		<button type="button" id='dcBtn' onclick="disconnect();">Disconnect</button>
-	</div>
-		<p class="score" id="left-score"></p>
-		<canvas id = "myCanvas" width="550" height="550"></canvas>
-</div>
-</body>
-
-
 </html>
