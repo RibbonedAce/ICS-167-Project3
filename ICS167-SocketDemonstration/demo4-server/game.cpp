@@ -4,7 +4,7 @@
 #define X_BOUNDS 550
 #define Y_BOUNDS 550
 #define BALL_RADIUS 10
-#define PADDLE_OFFSET 10
+#define PADDLE_OFFSET 20
 #define PADDLE_LENGTH 120
 #define PADDLE_WIDTH 10
 
@@ -58,7 +58,7 @@ void game::updateBall() {
 		}
 		else if (this->ballPos.x - BALL_RADIUS < PADDLE_OFFSET + PADDLE_WIDTH && this->lastBallPos.x - BALL_RADIUS >= PADDLE_OFFSET + PADDLE_WIDTH) {
 			if (this->ballPos.y - players[0].position > 0 && this->ballPos.y - players[0].position < PADDLE_LENGTH) {
-				++this->players[0].score;
+				changeScore(0, 1);
 				flipBallHorizontal();
 			}
 		}

@@ -111,7 +111,7 @@
 
         function connect(){
             
-			Server = new FancyWebSocket('ws://' + ip + ":" + port);
+			Server = new FancyWebSocket('ws://' + document.getElementById("ipEntry").value + ":" + document.getElementById("portEntry").value);
 			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
