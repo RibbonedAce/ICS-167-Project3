@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 
-#define MAX_PLAYERS 1
+#define MAX_PLAYERS 4
 #define X_BOUNDS 550
 #define Y_BOUNDS 550
 #define BALL_RADIUS 10
@@ -19,24 +19,24 @@ using namespace std;
 void game::addPlayer(int id, string _name) {
 	player toAdd;
 	toAdd.name = _name;
-	toAdd.position = 250;
+	toAdd.position = (X_BOUNDS + PADDLE_LENGTH) / 2;
 	toAdd.score = 0;
 	players[id] = toAdd;
-	if (this->getNumOfPlayers() >= MAX_PLAYERS) {
-		this->startGame();
+	if (getNumOfPlayers() >= MAX_PLAYERS) {
+		startGame();
 	}
 }
 
 void game::removePlayer(int id) {
-	this->players[id].name = "";
-	this->players[id].score = 0;
-	this->players[id].position = 250;
-	this->stopGame();
+	players[id].name = "";
+	players[id].score = 0;
+	players[id].position = 250;
+	stopGame();
 }
 
 int game::getNumOfPlayers() {
 	int result = 0;
-	for (map<int, player>::iterator it = this->players.begin(); it != this->players.end(); ++it) {
+	for (map<int, player>::iterator it = players.begin(); it != players.end(); ++it) {
 		if (it->second.name != "") {
 			++result;
 		}
@@ -45,47 +45,66 @@ int game::getNumOfPlayers() {
 }
 
 void game::updateBall() {
-	if (this->running) {
-		this->lastBallPos.x = ballPos.x;
-		this->lastBallPos.y = ballPos.y;
-		this->ballPos.x += cos(this->ballDirection * M_PI / 180);
-		this->ballPos.y += sin(this->ballDirection * M_PI / 180);
-		if (this->ballPos.y + BALL_RADIUS > Y_BOUNDS || this->ballPos.y - BALL_RADIUS < 0) {
-			flipBallVertical();
+	if (running) {
+		lastBallPos.x = ballPos.x;
+		lastBallPos.y = ballPos.y;
+		ballPos.x += cos(ballDirection * M_PI / 180);
+		ballPos.y += sin(ballDirection * M_PI / 180);
+		if (ballPos.y + BALL_RADIUS > Y_BOUNDS || ballPos.y - BALL_RADIUS < 0 ||
+			ballPos.x + BALL_RADIUS > X_BOUNDS || ballPos.x - BALL_RADIUS < 0) {
+			changeScore(lastPlayerHit, 1);
+			resetBall();
 		}
-		if (this->ballPos.x + BALL_RADIUS > X_BOUNDS) {
-			flipBallHorizontal();
-		}
-		else if (this->ballPos.x - BALL_RADIUS < PADDLE_OFFSET + PADDLE_WIDTH && this->lastBallPos.x - BALL_RADIUS >= PADDLE_OFFSET + PADDLE_WIDTH) {
-			if (this->ballPos.y - players[0].position > 0 && this->ballPos.y - players[0].position < PADDLE_LENGTH) {
-				changeScore(0, 1);
+		if (ballPos.x - BALL_RADIUS < PADDLE_OFFSET + PADDLE_WIDTH && 
+			lastBallPos.x - BALL_RADIUS >= PADDLE_OFFSET + PADDLE_WIDTH && 
+			ballPos.y - players[0].position > 0 && ballPos.y - players[0].position < PADDLE_LENGTH) {
 				flipBallHorizontal();
-			}
+				lastPlayerHit = 0;
 		}
-		else if (this->ballPos.x - BALL_RADIUS < 0) {
-			stopGame();
+		if (ballPos.y - BALL_RADIUS < PADDLE_OFFSET + PADDLE_WIDTH &&
+			lastBallPos.y - BALL_RADIUS >= PADDLE_OFFSET + PADDLE_WIDTH &&
+			ballPos.x - players[1].position > 0 && ballPos.x - players[1].position < PADDLE_LENGTH) {
+			flipBallVertical();
+			lastPlayerHit = 1;
+		}
+		if (ballPos.x + BALL_RADIUS > X_BOUNDS - (PADDLE_OFFSET + PADDLE_WIDTH) &&
+			lastBallPos.x + BALL_RADIUS <= X_BOUNDS - (PADDLE_OFFSET + PADDLE_WIDTH) &&
+			ballPos.y - players[2].position > 0 && ballPos.y - players[2].position < PADDLE_LENGTH) {
+			flipBallHorizontal();
+			lastPlayerHit = 2;
+		}
+		if (ballPos.y + BALL_RADIUS > Y_BOUNDS - (PADDLE_OFFSET + PADDLE_WIDTH) &&
+			lastBallPos.y + BALL_RADIUS <= Y_BOUNDS - (PADDLE_OFFSET + PADDLE_WIDTH) &&
+			ballPos.x - players[3].position > 0 && ballPos.x - players[3].position < PADDLE_LENGTH) {
+			flipBallVertical();
+			lastPlayerHit = 3;
 		}
 	}
 }
 
+void game::resetBall() {
+	ballPos.x = X_BOUNDS / 2;
+	ballPos.y = Y_BOUNDS / 2;
+	ballDirection = rand() % 360;
+}
+
 void game::changeScore(int index, int toAdd) {
-	this->players[index].score += toAdd;
-	if (this->players[index].score >= this->maxScore) {
-		this->stopGame();
+	players[index].score += toAdd;
+	if (players[index].score >= maxScore) {
+		stopGame();
 	}
 }
 
 void game::startGame() {
-	this->running = true;
+	resetBall();
+	running = true;
 }
 
 void game::stopGame() {
-	for (map<int,player>::iterator it = this->players.begin(); it != this->players.end(); ++it) {
+	for (map<int, player>::iterator it = players.begin(); it != players.end(); ++it) {
 		it->second.score = 0;
 	}
-	ballPos.x = 250;
-	ballPos.y = 250;
-	this->running = false;
+	running = false;
 }
 
 void game::flipBallVertical() {

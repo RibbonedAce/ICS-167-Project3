@@ -26,6 +26,7 @@ public:
 	map<int, player> players;
 	xyCoords ballPos;
 	int ballDirection;
+	int lastPlayerHit;
 	int maxScore;
 	
 	game() {
@@ -41,6 +42,7 @@ public:
 	void removePlayer(int id);
 	int getNumOfPlayers();
 	void updateBall();
+	void resetBall();
 	void changeScore(int index, int toAdd);
 	void startGame();
 	void stopGame();

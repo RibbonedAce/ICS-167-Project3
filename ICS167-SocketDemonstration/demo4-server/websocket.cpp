@@ -678,7 +678,7 @@ void webSocket::setPeriodicHandler(nullCallback callback){
 void webSocket::startServer(int port){
     showAvailableIP();
 
-	this->pongGame = new game();
+	pongGame = new game();
 
     int yes = 1;
     char buf[4096];
@@ -725,7 +725,7 @@ void webSocket::startServer(int port){
         if (select(fdmax+1, &read_fds, NULL, NULL, &timeout) > 0){
             for (int i = 0; i <= fdmax; i++){
                 if (FD_ISSET(i, &read_fds)){
-                    if (i == listenfd && this->pongGame->getNumOfPlayers() < MAX_CLIENTS){
+                    if (i == listenfd && pongGame->getNumOfPlayers() < MAX_CLIENTS){
                         socklen_t addrlen = sizeof(cli_addr);
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
                         if (newfd != -1){
@@ -759,13 +759,13 @@ void webSocket::startServer(int port){
             nextPingTime = time(NULL) + 1;
         }
 
-		this->updateGame();
+		updateGame();
 		ostringstream os;
-		os << "Game:" << this->getGameStats();
-		vector<int> clientIDs = this->getClientIDs();
+		os << "Game:" << getGameStats();
+		vector<int> clientIDs = getClientIDs();
 		for (int i = 0; i < clientIDs.size(); i++) {
 			if (time(NULL) >= wsClients[i]->startTime + 1) {
-				this->wsSend(clientIDs[i], os.str());
+				wsSend(clientIDs[i], os.str());
 			}
 		}
 
@@ -799,19 +799,19 @@ void webSocket::stopServer(){
 }
 
 bool webSocket::gameIsPlaying() {
-	return this->pongGame->running;
+	return pongGame->running;
 }
 
 void webSocket::editPlayerPos(int index, float _position) {
-	this->pongGame->players[index].position = _position;
+	pongGame->players[index].position = _position;
 }
 
 void webSocket::addPlayer(int id, string _name) {
-	this->pongGame->addPlayer(id, _name);
+	pongGame->addPlayer(id, _name);
 }
 
 void webSocket::removePlayer(int id) {
-	this->pongGame->removePlayer(id);
+	pongGame->removePlayer(id);
 }
 
 void webSocket::updateGame() {
@@ -820,8 +820,8 @@ void webSocket::updateGame() {
 
 string webSocket::getGameStats() {
 	string result = to_string(pongGame->ballPos.x) + "," + to_string(pongGame->ballPos.y);
-	for (map<int, player>::iterator it = this->pongGame->players.begin(); it != this->pongGame->players.end(); ++it) {
-		result += ";" + to_string(it->first) + "," + it->second.name + "," + to_string(it->second.position) + "," + to_string(it->second.score);
+	for (map<int, player>::iterator it = pongGame->players.begin(); it != pongGame->players.end(); ++it) {
+		result += ";" + to_string(it->first) + "," + to_string(it->second.position) + "," + to_string(it->second.score);
 	}
 	return result;
 }
