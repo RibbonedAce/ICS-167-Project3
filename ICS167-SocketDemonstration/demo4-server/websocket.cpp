@@ -803,7 +803,9 @@ bool webSocket::gameIsPlaying() {
 }
 
 void webSocket::editPlayerPos(int index, float _position) {
-	pongGame->players[index].position = _position;
+	if (pongGame->players[index] != nullptr) {
+		pongGame->players[index]->position = _position;
+	}
 }
 
 void webSocket::addPlayer(int id, string _name) {
@@ -820,8 +822,10 @@ void webSocket::updateGame() {
 
 string webSocket::getGameStats() {
 	string result = to_string(pongGame->ballPos.x) + "," + to_string(pongGame->ballPos.y);
-	for (map<int, player>::iterator it = pongGame->players.begin(); it != pongGame->players.end(); ++it) {
-		result += ";" + to_string(it->first) + "," + to_string(it->second.position) + "," + to_string(it->second.score);
+	for (int i = 0; i < pongGame->players.size(); ++i) {
+		if (pongGame->players[i] != nullptr) {
+			result += ";" + to_string(i) + "," + pongGame->players[i]->name + "," + to_string(pongGame->players[i]->position) + "," + to_string(pongGame->players[i]->score);
+		}
 	}
 	return result;
 }

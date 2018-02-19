@@ -2,8 +2,8 @@
 #define GAME_H
 
 #define SCORE_LIMIT 10
+#define MAX_PLAYERS 4
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -23,7 +23,7 @@ struct player {
 class game {
 public:
 	bool running;
-	map<int, player> players;
+	vector<player*> players;
 	xyCoords ballPos;
 	int ballDirection;
 	int lastPlayerHit;
@@ -31,7 +31,10 @@ public:
 	
 	game() {
 		running = false;
-		players = map<int, player>();
+		players = vector<player*>();
+		for (int i = 0; i < MAX_PLAYERS; ++i) {
+			players.push_back(nullptr);
+		}
 		ballPos.x = 250;
 		ballPos.y = 250;
 		ballDirection = rand() % 360;
