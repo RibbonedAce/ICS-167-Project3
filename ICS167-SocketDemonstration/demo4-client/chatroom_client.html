@@ -13,6 +13,8 @@
         <div>Port: <input type="text" name="port" value="15000" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
+		<div><button type="button" onclick="disconnect();", id="disconnectButton">Disconnect</button></div>
+		<div><button type="button" onclick="ready();" id='readyButton'>Ready</button></div>
     </div>
     
     <div class="playerContainer">
@@ -32,13 +34,7 @@
     <div style="padding-top: 5px; padding-bottom: 5px;">
         <canvas id="gameCanvas" width="550" height="550" style="border:5px solid black;"></canvas>
     </div> 
-    
-<!--
-    <div>
-        <div><button type="button" onclick="ready();" id='readyButton'>Ready</button></div>
-    </div>
--->
-    
+  
     <div style="padding-top: 5px; padding-bottom: 5px;">
         <label type="text" name="updates" id="updateBar">Welcome to Multiplayer Pong</label>
     </div>
@@ -49,21 +45,50 @@
 	<script src="fancywebsocket.js"></script>
 	<script>
 		
-        var myGamePiece;
+        var Player1Piece;
+		var Player2Piece;
+		var Player3Piece;
+		var Player4Piece;
         var gameBall;
         
 		var Server;
-		var uName;
-        var score = 0;
+		var ID;
+        
 		
 		var xBall=275;
 		var yBall=275;
 		
-		var xPaddle = 20;
-		var yPaddle = 0;
-		var paddleW = 10;
-		var paddleH = 120;
+		var x1Paddle = 20;
+		var y1Paddle = 20;
+		var paddleW1 = 10;
+		var paddleH1 = 120;
         var paddleColor = "#ffffff";
+		var score1 = 0;
+		var uName1 = "";
+		
+		var x2Paddle = 215;
+		var y2Paddle = 20;
+		var paddleW2 = 120;
+		var paddleH2= 10;
+        var paddleColor2 = "#ffffff";
+		var score2 = 0;
+		var uName2 = "";
+		
+		var x3Paddle = 530;
+		var y3Paddle = 20;
+		var paddleW3 = 10;
+		var paddleH3 = 120;
+        var paddleColor3 = "#ffffff";
+		var score3 = 0;
+		var uName3 = "";
+		
+		var x4Paddle = 215;
+		var y4Paddle = 530;
+		var paddleW4 = 120;
+		var paddleH4 = 10;
+        var paddleColor4 = "#ffffff";
+		var score4 = 0;
+		var uName4 = "";
 		
 		var dx=5;
 		var dy=5;
@@ -101,7 +126,7 @@
             yBall = parseInt(Pos[1]);
             gameBall.newPos(xBall, yBall);
             gameBall.update();
-            score = res[1].split(",")[3];
+            score1 = res[1].split(",")[3];
 		}
         
         
@@ -124,8 +149,8 @@
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("connectButton").disabled = true;
-				uName = document.getElementById("nameEntry").value;
-				send("Name:" + uName.toString());
+				uName1 = document.getElementById("nameEntry").value;
+				send("Name:" + uName1.toString());
 			});
 
 			//OH NOES! Disconnection occurred.
@@ -140,18 +165,35 @@
 				//slice payload to get info for gamestate
 				if(payload.substring(0,4) == "Game")
 					ProcessPayLoad(payload);
+				document.getElementById("updateBar").innerHTML = payload;
 			});
 
 			Server.connect();
             myGameArea.start();
+			
             paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			paddleColor2 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			paddleColor3 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			paddleColor4 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
             if ( paddleColor == "#ffffff"){
-                paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
-            }
-            myGamePiece = new paddle(paddleW, paddleH, paddleColor, xPaddle, yPaddle);
-            gameBall = new ball();
-            document.getElementById("score1").innerHTML = uName + ": " + score;
-            document.getElementById("color1").style.backgroundColor = paddleColor;
+			    paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			  }
+			if ( paddleColor2 == "#ffffff" && paddleColor2 == paddleColor){
+			    paddleColor2 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			  }
+			//game ball
+			gameBall = new ball();
+			
+			//players' paddles
+            Player1Piece = new paddle(paddleW1, paddleH1, paddleColor, x1Paddle, y1Paddle);
+			Player2Piece = new paddle(paddleW2, paddleH2, paddleColor2, x2Paddle, y2Paddle);
+
+			//player1 score
+            document.getElementById("score1").innerHTML = uName1 + ": " + score1;
+			document.getElementById("score2").innerHTML = uName2 + ": " + score2;
+			//player2 score
+			document.getElementById("color1").style.backgroundColor = paddleColor;
+            document.getElementById("color2").style.backgroundColor = paddleColor2;
         }
         
         function disconnect()
@@ -203,17 +245,31 @@
         
         function updateGameArea() {
             myGameArea.clear();
-            myGamePiece.speedX = 0;
-            myGamePiece.speedY = 0;
-            //if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -2; }
-            //if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 2; }
-            if (myGameArea.key && myGameArea.key == 38 && myGamePiece.y > 20) {myGamePiece.speedY = -2; }
-            if (myGameArea.key && myGameArea.key == 40 && myGamePiece.y < 410) {myGamePiece.speedY = 2; }
-            gameBall.newPos(xBall, yBall);
+			
+			gameBall.newPos(xBall, yBall);
             gameBall.update();
-            myGamePiece.newPos();    
-            myGamePiece.update();
-            document.getElementById("score1").innerHTML = uName + ": " + score;
+			
+            Player1Piece.speedX = 0;
+            Player1Piece.speedY = 0;
+			
+			Player2Piece.speedX = 0;
+            Player2Piece.speedY = 0;
+            //if (myGameArea.key && myGameArea.key == 37) {Player1Piece.speedX = -2; }
+            //if (myGameArea.key && myGameArea.key == 39) {Player1Piece.speedX = 2; }
+			//if(ID == "1")
+			//{
+				if (myGameArea.key && myGameArea.key == 38 && Player1Piece.y > 20) {Player1Piece.speedY = -2; }
+				if (myGameArea.key && myGameArea.key == 40 && Player1Piece.y < 410) {Player1Piece.speedY = 2; }
+				
+				Player1Piece.newPos();    
+				Player1Piece.update();
+			
+				//Player2Piece.newPos();    
+				Player2Piece.update();
+			//}
+					
+            document.getElementById("score1").innerHTML = uName1 + ": " + score1;
+			document.getElementById("score2").innerHTML = uName2 + ": " + score2;
         }
 	</script>
 </html>
