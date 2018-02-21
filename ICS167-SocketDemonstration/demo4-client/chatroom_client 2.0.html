@@ -212,7 +212,7 @@
 		{
 			var Pos;
 			var index;
-			if(text.split(":")[0] == "Position")
+			if(text.split(":")[0] == "Positions")
 			{
 				var pLoad = text.split(":")[1];
 				console.log(pLoad);
@@ -291,7 +291,7 @@
 					paddleH = PlayerPos[3];
 					myGamePiece = new paddle(paddleW,paddleH,paddleColor,xPaddle,yPaddle);
 				}
-				else if(payload == "Start")
+				else if(payload == "Start Game")
 				{
 					//myGameArea.start();
 					isGamePlaying = true;
@@ -376,8 +376,8 @@
         
         function ball() {
             this.gamearea = myGameArea;  
-            this.x = 275
-            this.y = 275
+            this.x = 275;
+            this.y = 275;
             this.update = function() {
                 ctx = myGameArea.context;
                 ctx.beginPath();
