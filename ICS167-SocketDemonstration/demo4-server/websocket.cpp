@@ -763,17 +763,13 @@ void webSocket::startServer(int port){
 		if (pongGame->running) {
 			for (int i = 0; i < MAX_CLIENTS; ++i) {
 				if (pongGame->players[i] != nullptr) {
-					sendToAll(getPositions(i), i);
+					wsSend(i, getPositions(i));
 				}
 			}
 		}
 		if (pongGame->started) {
-			for (int i = 0; i < MAX_CLIENTS; ++i) {
-				if (pongGame->players[i] != nullptr) {
-					pongGame->started = false;
-					sendToAll("Start game");
-				}
-			}
+			pongGame->started = false;
+			sendToAll("Start game");
 		}
 
         if (callPeriodic != NULL)
