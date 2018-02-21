@@ -2,7 +2,7 @@
 #define GAME_H
 
 #define SCORE_LIMIT 10
-#define MAX_PLAYERS 2
+#define MAX_PLAYERS 4
 
 #include <string>
 #include <vector>
