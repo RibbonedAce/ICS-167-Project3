@@ -197,9 +197,9 @@
 		function initPlayers(strng)
 		{
 			var temp = strng.split(";");
-			for(i = opponents.length; i < parseInt(temp[0]); ++i)
+			for(i = opponents.length; i < temp.length; ++i)
 			{
-				var index = temp[i + 1].split(",");
+				var index = temp[i].split(",");
 				if(ID != parseInt(index[0]))
 				{
 					var newC = "#" + index[2];
