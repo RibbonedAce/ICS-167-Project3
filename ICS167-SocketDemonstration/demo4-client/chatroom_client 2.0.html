@@ -197,7 +197,7 @@
 		function initPlayers(strng)
 		{
 			var temp = strng.split(";");
-			for(i = 0; i < parseInt(temp[0]); ++i)
+			for(i = opponents.length; i < parseInt(temp[0]); ++i)
 			{
 				var index = temp[i + 1].split(",");
 				if(ID != parseInt(index[0]))
@@ -355,9 +355,12 @@
             }
             this.newPos = function() {
 				if(isGamePlaying){
-                this.x += this.speedX;
-                this.y += this.speedY; 
-				send("Position:"+this.y.toString());
+					this.x += this.speedX;
+					this.y += this.speedY; 
+					if(ID == 0 || ID == 2)
+						send("Position:"+this.y.toString());
+					else 
+						send("Position:"+this.x.toString());
 				}
             }
 			this.newOppPos = function(opponent)
