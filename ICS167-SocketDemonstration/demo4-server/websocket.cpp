@@ -14,7 +14,7 @@
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
-#define MAX_CLIENTS 1
+#define MAX_CLIENTS 4
 #endif
 
 #include <stdio.h>
@@ -760,12 +760,19 @@ void webSocket::startServer(int port){
         }
 
 		updateGame();
-		ostringstream os;
-		os << "Game:" << getGameStats();
-		vector<int> clientIDs = getClientIDs();
-		for (int i = 0; i < clientIDs.size(); i++) {
-			if (time(NULL) >= wsClients[i]->startTime + 1) {
-				wsSend(clientIDs[i], os.str());
+		if (pongGame->running) {
+			for (int i = 0; i < MAX_CLIENTS; ++i) {
+				if (pongGame->players[i] != nullptr) {
+					sendToAll(getPositions(i), i);
+				}
+			}
+		}
+		if (pongGame->started) {
+			for (int i = 0; i < MAX_CLIENTS; ++i) {
+				if (pongGame->players[i] != nullptr) {
+					pongGame->started = false;
+					sendToAll("Start game");
+				}
 			}
 		}
 
@@ -808,8 +815,19 @@ void webSocket::editPlayerPos(int index, float _position) {
 	}
 }
 
-void webSocket::addPlayer(int id, string _name) {
-	pongGame->addPlayer(id, _name);
+void webSocket::addPlayer(int id, string _name, string color) {
+	unsigned int intColor;
+	std::stringstream ss;
+	ss << std::hex << color;
+	ss >> intColor;
+	pongGame->addPlayer(id, _name, intColor);
+	sendToAll(getPlayer(id), id);
+}
+
+void webSocket::readyPlayer(int id) {
+	if (pongGame->players[id] != nullptr) {
+		pongGame->players[id]->ready = true;
+	}
 }
 
 void webSocket::removePlayer(int id) {
@@ -818,9 +836,13 @@ void webSocket::removePlayer(int id) {
 
 void webSocket::updateGame() {
 	pongGame->updateBall();
+	if (pongGame->scored) {
+		pongGame->scored = false;
+		sendToAll(getScores());
+	}
 }
 
-string webSocket::getGameStats() {
+/*string webSocket::getGameStats() {
 	string result = to_string(pongGame->ballPos.x) + "," + to_string(pongGame->ballPos.y);
 	for (int i = 0; i < pongGame->players.size(); ++i) {
 		if (pongGame->players[i] != nullptr) {
@@ -828,4 +850,47 @@ string webSocket::getGameStats() {
 		}
 	}
 	return result;
+}*/
+
+string webSocket::getPlayer(int index) {
+	string result = "init:";
+	if (pongGame->players[index] != nullptr) {
+		result += to_string(index) + "," + pongGame->players[index]->name + ",";
+		std::stringstream ss;
+		ss << std::hex << pongGame->players[index]->color;
+		result += ss.str();
+	}
+	return result.substr(0);
+}
+
+string webSocket::getPositions(int mask) {
+	string result = "Positions:";
+	result += to_string(pongGame->ballPos.x) + "," + to_string(pongGame->ballPos.y);
+	for (int i = 0; i < pongGame->players.size(); ++i) {
+		if (i != mask && pongGame->players[i] != nullptr) {
+			result += ";" + to_string(i) + "," + to_string(pongGame->players[i]->position);
+		}
+	}
+	return result;
+}
+
+string webSocket::getScores() {
+	string result = "Scores:";
+	for (int i = 0; i < pongGame->players.size(); ++i) {
+		if (pongGame->players[i] != nullptr) {
+			result += to_string(i) + "," + to_string(pongGame->players[i]->score) + ";";
+		}
+	}
+	return result.substr(0, result.length() - 1);
+}
+
+void webSocket::sendToAll(string data, int mask) {
+	ostringstream os;
+	os << data;
+	vector<int> clientIDs = getClientIDs();
+	for (int i = 0; i < clientIDs.size(); i++) {
+		if (i != mask && time(NULL) >= wsClients[i]->startTime + 1) {
+			wsSend(clientIDs[i], os.str());
+		}
+	}
 }

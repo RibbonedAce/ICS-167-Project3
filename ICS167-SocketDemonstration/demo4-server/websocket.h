@@ -99,11 +99,16 @@ public:
     void startServer(int port);
     void stopServer();
 	bool gameIsPlaying();
-	void addPlayer(int id, string _name);
+	void addPlayer(int id, string _name, string color);
+	void readyPlayer(int id);
 	void removePlayer(int id);
 	void editPlayerPos(int index, float _position);
 	void updateGame();
-	string getGameStats();
+	//string getGameStats();
+	string getPlayer(int index);
+	string getPositions(int mask = -1);
+	string getScores();
+	void sendToAll(string data, int mask = -1);
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
     vector<int> getClientIDs();

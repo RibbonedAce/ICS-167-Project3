@@ -20,7 +20,7 @@ void openHandler(int clientID){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }*/
-    server.wsSend(clientID, "Welcome!");
+    server.wsSend(clientID, "");
 }
 
 /* called when a client disconnects */
@@ -39,23 +39,35 @@ void closeHandler(int clientID){
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
-    ostringstream os;
+    /*ostringstream os;
     os << "Stranger " << clientID << " says: " << message;
 
     vector<int> clientIDs = server.getClientIDs();
 	for (int i = 0; i < clientIDs.size(); i++) {
 		if (clientIDs[i] != clientID)
 			server.wsSend(clientIDs[i], os.str());
-	}
+	}*/
+	vector<int> clientIDs = server.getClientIDs();
 	string prefix = message.substr(0, message.find(':'));
 	if (prefix == "Name")
 	{
-		server.addPlayer(clientID, message.substr(message.find(':') + 1));
+		server.addPlayer(clientID, message.substr(message.find(':') + 1, message.find(';') - message.find(':') - 1), message.substr(message.find(';') + 1));
+		ostringstream os;
+		os << "ID:" << clientID;
+		server.wsSend(clientIDs[clientID], os.str());
 	}
 	else if (prefix == "Position")
 	{
 		float newPos = stof(message.substr(message.find(':') + 1));
 		server.editPlayerPos(clientID, newPos);
+	}
+	else if (prefix == "Ready")
+	{
+		server.readyPlayer(clientID);
+	}
+	else
+	{
+		printf("Unknown prefix");
 	}
 }
 

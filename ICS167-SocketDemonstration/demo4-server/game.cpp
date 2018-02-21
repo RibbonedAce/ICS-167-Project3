@@ -14,16 +14,16 @@
 
 using namespace std;
 
-void game::addPlayer(int id, string _name) {
+void game::addPlayer(int id, string _name, int color) {
 	player toAdd;
 	toAdd.name = _name;
+	toAdd.ready = false;
+	toAdd.color = color;
 	toAdd.position = (X_BOUNDS + PADDLE_LENGTH) / 2;
 	toAdd.score = 0;
 	removePlayer(id);
 	players[id] = new player(toAdd);
-	if (getNumOfPlayers() >= MAX_PLAYERS) {
-		startGame();
-	}
+
 }
 
 void game::removePlayer(int id) {
@@ -44,7 +44,19 @@ int game::getNumOfPlayers() {
 	return result;
 }
 
+bool game::allReady() {
+	for (const auto& i : players) {
+		if (i == nullptr || !(i->ready)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 void game::updateBall() {
+	if (!running && allReady()) {
+		startGame();
+	}
 	if (running) {
 		lastBallPos.x = ballPos.x;
 		lastBallPos.y = ballPos.y;
@@ -91,6 +103,7 @@ void game::resetBall() {
 
 void game::changeScore(int index, int toAdd) {
 	if (index >= 0 && players[index] != nullptr) {
+		scored = true;
 		players[index]->score += toAdd;
 		if (players[index]->score >= maxScore) {
 			stopGame();
@@ -100,6 +113,8 @@ void game::changeScore(int index, int toAdd) {
 
 void game::startGame() {
 	resetBall();
+	sendColors = true;
+	started = true;
 	running = true;
 }
 

@@ -16,6 +16,8 @@ struct xyCoords {
 
 struct player {
 	string name;
+	bool ready;
+	int color;
 	float position;
 	int score;
 };
@@ -23,6 +25,9 @@ struct player {
 class game {
 public:
 	bool running;
+	bool started;
+	bool scored;
+	bool sendColors;
 	vector<player*> players;
 	xyCoords ballPos;
 	int ballDirection;
@@ -31,6 +36,9 @@ public:
 	
 	game() {
 		running = false;
+		started = false;
+		scored = false;
+		sendColors = false;
 		players = vector<player*>();
 		for (int i = 0; i < MAX_PLAYERS; ++i) {
 			players.push_back(nullptr);
@@ -41,9 +49,10 @@ public:
 		maxScore = SCORE_LIMIT;
 	}
 
-	void addPlayer(int id, string _name);
+	void addPlayer(int id, string _name, int color);
 	void removePlayer(int id);
 	int getNumOfPlayers();
+	bool allReady();
 	void updateBall();
 	void resetBall();
 	void changeScore(int index, int toAdd);
