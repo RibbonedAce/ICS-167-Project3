@@ -208,8 +208,8 @@
 			if(text.substring(0,4) == "init")
 			{	
 				Pos = text.split(":");
-				console.log(Pos[1]);
-				initPlayers(Pos[1]);
+				if(Pos.length != 1)
+					initPlayers(Pos[1]);
 			}
 			if(text.split(":")[0] == "Scores")
 			{
