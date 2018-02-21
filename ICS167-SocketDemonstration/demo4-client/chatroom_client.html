@@ -10,7 +10,7 @@
     
     <div class="serverContainer">
         <div>IP: <input type="text" name="ip" value="127.0.0.1" id="ipEntry"></div>
-        <div>Port: <input type="text" name="port" value="15000" id="portEntry"></div>
+        <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
 		<div><button type="button" onclick="disconnect();", id="disconnectButton">Disconnect</button></div>
@@ -53,7 +53,7 @@
         
 		var Server;
 		var ID;
-        
+        var pLstring;
 		
 		var xBall=275;
 		var yBall=275;
@@ -74,7 +74,7 @@
 		var score2 = 0;
 		var uName2 = "";
 		
-		var x3Paddle = 530;
+		var x3Paddle = 520;
 		var y3Paddle = 20;
 		var paddleW3 = 10;
 		var paddleH3 = 120;
@@ -83,7 +83,7 @@
 		var uName3 = "";
 		
 		var x4Paddle = 215;
-		var y4Paddle = 530;
+		var y4Paddle = 520;
 		var paddleW4 = 120;
 		var paddleH4 = 10;
         var paddleColor4 = "#ffffff";
@@ -163,9 +163,15 @@
 			{
 				//log(payload);
 				//slice payload to get info for gamestate
+				pLstring = payload;
+				if(payload.substring(0,2) =="ID")
+				{
+					ID = payload.substring(3,payload.length);		
+				}
 				if(payload.substring(0,4) == "Game")
+				{
 					ProcessPayLoad(payload);
-				document.getElementById("updateBar").innerHTML = payload;
+				}
 			});
 
 			Server.connect();
@@ -175,11 +181,17 @@
 			paddleColor2 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			paddleColor3 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			paddleColor4 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
-            if ( paddleColor == "#ffffff"){
+            while( paddleColor == "#ffffff"){
 			    paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			  }
-			if ( paddleColor2 == "#ffffff" && paddleColor2 == paddleColor){
+			while( paddleColor2 == "#ffffff" || paddleColor2 == paddleColor){
 			    paddleColor2 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			  }
+			while( paddleColor3 == "#ffffff" || paddleColor3 == paddleColor || paddleColor3 == paddleColor2){
+			    paddleColor3 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			  }
+			while( paddleColor4 == "#ffffff" || paddleColor4 == paddleColor || paddleColor4 == paddleColor2 || paddleColor4 == paddleColor3){
+			    paddleColor4 = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			  }
 			//game ball
 			gameBall = new ball();
@@ -187,13 +199,19 @@
 			//players' paddles
             Player1Piece = new paddle(paddleW1, paddleH1, paddleColor, x1Paddle, y1Paddle);
 			Player2Piece = new paddle(paddleW2, paddleH2, paddleColor2, x2Paddle, y2Paddle);
+			Player3Piece = new paddle(paddleW3, paddleH3, paddleColor3, x3Paddle, y3Paddle);
+			Player4Piece = new paddle(paddleW4, paddleH4, paddleColor4, x4Paddle, y4Paddle);
 
 			//player1 score
             document.getElementById("score1").innerHTML = uName1 + ": " + score1;
 			document.getElementById("score2").innerHTML = uName2 + ": " + score2;
+			document.getElementById("score3").innerHTML = uName3 + ": " + score3;
+			document.getElementById("score4").innerHTML = uName4 + ": " + score4;
 			//player2 score
 			document.getElementById("color1").style.backgroundColor = paddleColor;
             document.getElementById("color2").style.backgroundColor = paddleColor2;
+			document.getElementById("color3").style.backgroundColor = paddleColor3;
+            document.getElementById("color4").style.backgroundColor = paddleColor4;
         }
         
         function disconnect()
@@ -218,8 +236,11 @@
             }
             this.newPos = function() {
                 this.x += this.speedX;
-                this.y += this.speedY; 
-                send("Position:"+this.y.toString());
+                this.y += this.speedY;
+				if(ID == 1 || ID == 3)
+					send("Position:"+this.y.toString());
+				else
+					send("Position:"+this.x.toString());
             }
         }
         
@@ -254,22 +275,88 @@
 			
 			Player2Piece.speedX = 0;
             Player2Piece.speedY = 0;
-            //if (myGameArea.key && myGameArea.key == 37) {Player1Piece.speedX = -2; }
-            //if (myGameArea.key && myGameArea.key == 39) {Player1Piece.speedX = 2; }
-			//if(ID == "1")
-			//{
+			
+			Player3Piece.speedX = 0;
+            Player3Piece.speedY = 0;
+			
+			Player4Piece.speedX = 0;
+            PlayerPiece.speedY = 0;
+
+			if(ID == "0")
+			{
 				if (myGameArea.key && myGameArea.key == 38 && Player1Piece.y > 20) {Player1Piece.speedY = -2; }
 				if (myGameArea.key && myGameArea.key == 40 && Player1Piece.y < 410) {Player1Piece.speedY = 2; }
 				
 				Player1Piece.newPos();    
 				Player1Piece.update();
 			
-				//Player2Piece.newPos();    
+				Player2Piece.newPos();    
 				Player2Piece.update();
-			//}
+				
+				Player3Piece.newPos();    
+				Player3Piece.update();
+				
+				Player4Piece.newPos();    
+				Player4Piece.update();
+			}
+			else if(ID == "1")
+			{
+				if (myGameArea.key && myGameArea.key == 38 && Player2Piece.x > 20) {Player2Piece.speedX = -2; }
+				if (myGameArea.key && myGameArea.key == 40 && Player2Piece.x < 410) {Player2Piece.speedX = 2; }
+				
+				Player1Piece.newPos();    
+				Player1Piece.update();
+			
+				Player2Piece.newPos();    
+				Player2Piece.update();
+				
+				Player3Piece.newPos();    
+				Player3Piece.update();
+				
+				Player4Piece.newPos();    
+				Player4Piece.update();
+			}
+			else if(ID == "2")
+			{
+				if (myGameArea.key && myGameArea.key == 38 && Player3Piece.y > 20) {Player3Piece.speedY = -2; }
+				if (myGameArea.key && myGameArea.key == 40 && Player3Piece.y < 410) {Player3Piece.speedY = 2; }
+				
+				Player1Piece.newPos();    
+				Player1Piece.update();
+			
+				Player2Piece.newPos();    
+				Player2Piece.update();
+				
+				Player3Piece.newPos();    
+				Player3Piece.update();
+				
+				Player4Piece.newPos();    
+				Player4Piece.update();
+			}
+			else
+			{
+				if (myGameArea.key && myGameArea.key == 38 && Player4Piece.x > 20) {Player4Piece.speedX = -2; }
+				if (myGameArea.key && myGameArea.key == 40 && Player4Piece.x < 410) {Player4Piece.speedX = 2; }
+				
+				Player1Piece.newPos();    
+				Player1Piece.update();
+			
+				Player2Piece.newPos();    
+				Player2Piece.update();
+				
+				Player3Piece.newPos();    
+				Player3Piece.update();
+				
+				Player4Piece.newPos();    
+				Player4Piece.update();
+			}
 					
             document.getElementById("score1").innerHTML = uName1 + ": " + score1;
 			document.getElementById("score2").innerHTML = uName2 + ": " + score2;
+			document.getElementById("score3").innerHTML = uName1 + ": " + score3;
+			document.getElementById("score4").innerHTML = uName2 + ": " + score4;
+			
+			document.getElementById("updateBar").innerHTML = pLstring;
         }
 	</script>
 </html>
