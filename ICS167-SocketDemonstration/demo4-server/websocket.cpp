@@ -821,12 +821,12 @@ void webSocket::addPlayer(int id, string _name, string color) {
 	ss << std::hex << color;
 	ss >> intColor;
 	pongGame->addPlayer(id, _name, intColor);
-	sendToAll(getPlayers(), id);
+	sendToAll(getPlayers());
 }
 
 void webSocket::readyPlayer(int id, int state) {
 	if (pongGame->players[id] != nullptr) {
-		pongGame->players[id]->ready = state);
+		pongGame->players[id]->ready = state;
 	}
 }
 
