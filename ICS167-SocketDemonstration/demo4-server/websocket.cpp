@@ -760,18 +760,8 @@ void webSocket::startServer(int port){
         }
 
 		updateGame();
-		if (pongGame->running) {
-			for (int i = 0; i < MAX_CLIENTS; ++i) {
-				if (pongGame->players[i] != nullptr) {
-					wsSend(i, getPositions(i));
-				}
-			}
-		}
-		if (pongGame->started) {
-			pongGame->started = false;
-			sendToAll("Start game");
-		}
-
+		checkEvents();
+		
         if (callPeriodic != NULL)
             callPeriodic();
     }
@@ -832,9 +822,24 @@ void webSocket::removePlayer(int id) {
 
 void webSocket::updateGame() {
 	pongGame->updateBall();
+}
+
+void webSocket::checkEvents() {
+	if (pongGame->running) {
+		for (int i = 0; i < MAX_CLIENTS; ++i) {
+			if (pongGame->players[i] != nullptr) {
+				wsSend(i, getPositions(i));
+			}
+		}
+	}
 	if (pongGame->scored) {
 		pongGame->scored = false;
 		sendToAll(getScores());
+	}
+	
+	if (pongGame->started) {
+		pongGame->started = false;
+		sendToAll("Start game");
 	}
 }
 

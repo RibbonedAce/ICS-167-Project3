@@ -104,6 +104,7 @@ public:
 	void removePlayer(int id);
 	void editPlayerPos(int index, float _position);
 	void updateGame();
+	void checkEvents();
 	//string getGameStats();
 	string getPlayers();
 	string getPositions(int mask = -1);
