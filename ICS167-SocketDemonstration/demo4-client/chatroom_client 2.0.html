@@ -9,7 +9,7 @@
 <center><body>  
     
     <div class="serverContainer">
-        <div>IP: <input type="text" name="ip" value="169.234.30.55" id="ipEntry"></div>
+        <div>IP: <input type="text" name="ip" value="127.0.0.1" id="ipEntry"></div>
         <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
@@ -47,6 +47,7 @@
 		
         var myGamePiece;
         var gameBall;
+		var isGamePlaying = false;
 		
 		var Server;
 		var uName;
@@ -71,7 +72,6 @@
 			var arr;
 			if(id == 0)
 			{
-				document.getElementById("updateBar").innerHTML = "Tada";
 				arr = new Array(20,215,10,120);
 			}
 			else if(id == 1)
@@ -99,16 +99,16 @@
 				}
 			}
 		}
-		function structPlayer(name,id,color)
+		function structPlayer(name,id,color,oScore)
 		{
 			var x = playerPos(parseInt(id));
-			//console.log(x);
 			var p = new paddle(x[2],x[3],color,x[0],x[1]);
 			var c = {
 				names: name,
 				IDs: id,
 				Colors: color,
-				Paddle: p
+				Paddle: p,
+				Score : oScore
 			}
 			return c;
 		}
@@ -116,10 +116,7 @@
         var myGameArea = {
             canvas : document.getElementById("gameCanvas") ,
             start : function() {
-                //this.canvas.width = 480;
-                //this.canvas.height = 270;
                 this.context = this.canvas.getContext("2d");
-                //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                 this.interval = setInterval(updateGameArea, 20);
                 window.addEventListener('keydown', function (e) {
                     myGameArea.key = e.keyCode;
@@ -133,45 +130,137 @@
             }
         }
         
-		
+		function updateOpponentCoordinates(text)
+		{
+				var res = text.split(";");
+				if(ID == 0)
+				{
+					//opponent ID: 1
+					opponents[0].name = res[2].split(",")[1];
+					opponents[0].Paddle.setX(parseFloat(res[2].split(",")[2]));
+					opponents[0].Score = res[2].split(",")[3];
+					//opponent ID: 2
+					opponents[1].name = res[3].split(",")[1];
+					opponents[1].Paddle.setY(parseFloat(res[3].split(",")[2]));
+					opponents[1].Score = res[3].split(",")[3];
+					//opponent ID: 3
+					opponents[2].name = res[4].split(",")[1];
+					opponents[2].Paddle.setX(parseFloat(res[4].split(",")[2]));
+					opponents[2].Score = res[4].split(",")[3];
+				}
+				else if(ID == 1)
+				{
+					//opponent ID: 0
+					opponents[0].name = res[1].split(",")[1];
+					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[2]));
+					opponents[0].Score = res[1].split(",")[3];
+					//opponent ID: 2
+					opponents[1].name = res[3].split(",")[1];
+					opponents[1].Paddle.setY(parseFloat(res[3].split(",")[2]));
+					opponents[1].Score = res[3].split(",")[3];
+					//opponent ID: 3
+					opponents[2].name = res[4].split(",")[1];
+					opponents[2].Paddle.setX(parseFloat(res[4].split(",")[2]));
+					opponents[2].Score = res[4].split(",")[3];
+				}
+				else if(ID == 2)
+				{
+					//opponent ID: 0
+					opponents[0].name = res[1].split(",")[1];
+					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[2]));
+					opponents[0].Score = res[1].split(",")[3];
+					//opponent ID: 1
+					opponents[1].name = res[2].split(",")[1];
+					opponents[1].Paddle.setX(parseFloat(res[2].split(",")[2]));
+					opponents[1].Score = res[2].split(",")[3];
+					//opponent ID: 3
+					opponents[2].name = res[4].split(",")[1];
+					opponents[2].Paddle.setX(parseFloat(res[4].split(",")[2]));
+					opponents[2].Score = res[4].split(",")[3];
+				}
+				else
+				{
+					//opponent ID: 0
+					opponents[0].name = res[1].split(",")[1];
+					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[2]));
+					opponents[0].Score = res[1].split(",")[3];
+					//opponent ID: 1
+					opponents[1].name = res[2].split(",")[1];
+					opponents[1].Paddle.setX(parseFloat(res[2].split(",")[2]));
+					opponents[1].Score = res[2].split(",")[3];
+					//opponent ID: 2
+					opponents[2].name = res[3].split(",")[1];
+					opponents[2].Paddle.setY(parseFloat(res[3].split(",")[2]));
+					opponents[2].Score = res[3].split(",")[3];
+				}
+		}
+		function initPlayers(strng)
+		{
+			var temp = strng.split(";");
+			for(i = 0; i < parseInt(temp[0]); ++i)
+			{
+				var index = temp[i + 1].split(",");
+				if(ID != parseInt(index[0]))
+				{
+					var newC = "#" + index[2];
+					var o = structPlayer(index[1],parseInt(index[0]),newC,0);
+					opponents.push(o);
+				}
+			}
+		}
 		function ProcessPayLoad(text)
 		{
 			var Pos;
 			var index;
 			if(text.substring(0,4) == "Game")
 			{
-				
 				var pLoad = text.split(":").pop();
 				var res = pLoad.split(";");
 				Pos = res[0].split(",");
+				
+				//Ball Coordinates update.
 				xBall = parseInt(Pos[0]);
 				yBall = parseInt(Pos[1]);
-				gameBall.newPos(xBall, yBall);
-				gameBall.update();
-				score = res[1].split(",")[3];
+				
+				//Player score update.
+				score = res[ID + 1].split(",")[3];
+				
+				//Opponent update.
+				updateOpponentCoordinates(pLoad);
+
 			}
 			if(text.substring(0,4) == "init")
-			{
-				
+			{	
 				Pos = text.split(":").pop();
-				index = Pos.split(",");
+				initPlayers(Pos);
+				/*var temp = Pos.split(";");
+				index = temp.split(",");
 				var newC = "#" + index[2]; 
-				var o = structPlayer(index[1],parseInt(index[0]),newC);
-				//console.log(o);
-				opponents.push(o);
-				o.Paddle.newOppPos(o);
+				if(ID != parseInt(index[0]))
+				{
+					var o = structPlayer(index[1],parseInt(index[0]),newC,0);
+					opponents.push(o);
+					o.Paddle.newOppPos(o);
+				}*/
 			}
 		}
         
 		function send( text ) {
 			Server.send( 'message', text );
 		}
-		
+		function getColor()
+		{
+			while ( paddleColor == "#ffffff")
+			{
+				paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+			}
+		}
         function connect(){
             var ip = document.getElementById("ipEntry").value;
 			var port = document.getElementById("portEntry").value;
 			uName = document.getElementById("nameEntry").value;
 			Server = new FancyWebSocket('ws://' + ip + ":" + port);
+			getColor();
 			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
@@ -180,9 +269,6 @@
 				}
 			});
 
-            while ( paddleColor == "#ffffff"){
-                paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
-            }
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("connectButton").disabled = true;
@@ -203,54 +289,61 @@
 				document.getElementById("updateBar").innerHTML = payload;
 				if(payload.substring(0,2) == "ID")
 				{
-					ID = payload.substring(3,payload.length);
 					myGameArea.start();
+					ID = parseInt(payload.substring(3,payload.length));
 					var PlayerPos = playerPos(ID);
-					myGamePiece = new paddle(PlayerPos[2],PlayerPos[3],paddleColor,PlayerPos[0],PlayerPos[1]);
-					myGamePiece.update();
+					xPaddle = PlayerPos[0];
+					yPaddle = PlayerPos[1];
+					paddleW = PlayerPos[2];
+					paddleH = PlayerPos[3];
+					myGamePiece = new paddle(paddleW,paddleH,paddleColor,xPaddle,yPaddle);
 				}
-				else if(payload == "Start Game")
+				else if(payload == "Start")
 				{
-					
+					//myGameArea.start();
+					isGamePlaying = true;
 				}
-				else ProcessPayLoad(payload);
-				
+				else
+				{
+					ProcessPayLoad(payload);
+				}
 			});
-
+			
 			Server.connect();
-            
+			
             gameBall = new ball();
-				
-            document.getElementById("score1").innerHTML = uName + ": " + score;
-            document.getElementById("color1").style.backgroundColor = paddleColor;
         }
         
         function disconnect()
 		{
 			document.getElementById("updateBar").innerHTML = "Disonnect";
-			Server.conn.close();
-			//Server.disconnect();
+			Server.disconnect();
 			readyStatus = false;
 		}
         
         function ready()
 		{
-			if(!readyStatus)
+			if(!isGamePlaying)
 			{
-				Server.send("Ready");
-				readyStatus = true;
-			}
-			else
-			{
-				Server.send("Ready");
-				readyStatus = false;
+				if(!readyStatus)
+				{
+					Server.send("Ready:1");
+					readyStatus = true;
+					document.getElementById("readyButton").innerHTML = "Cancel";
+				}
+				else
+				{
+					Server.send("Ready:0");
+					readyStatus = false;
+					document.getElementById("readyButton").innerHTML = "Ready";
+				}
 			}
 		}
         
         function paddle(width, height, color, x, y) {
 			this.gamearea = myGameArea;
-            this.width = width;
-            this.height = height;
+            this.width = parseInt(width);
+            this.height = parseInt(height);
             this.speedX = 0;
             this.speedY = 0; 
             this.x = parseFloat(x);
@@ -261,10 +354,11 @@
 				ctx.fillRect(this.x, this.y, this.width, this.height);
             }
             this.newPos = function() {
+				if(isGamePlaying){
                 this.x += this.speedX;
                 this.y += this.speedY; 
-				if(readyStatus)
-					send("Position:"+this.y.toString());
+				send("Position:"+this.y.toString());
+				}
             }
 			this.newOppPos = function(opponent)
 			{
@@ -273,6 +367,14 @@
 				ctx = myGameArea.context;
                 ctx.fillStyle = opponent.Colors;
 				ctx.fillRect(this.x,this.y,this.width,this.height);
+			}
+			this.setX = function(XPOS)
+			{
+				this.x = XPOS;
+			}
+			this.setY = function(YPOS)
+			{
+				this.y = YPOS;
 			}
         }
         
@@ -299,6 +401,26 @@
 			for(i = 0 ; i < opponents.length;i++)
 			{
 				opponents[i].Paddle.newOppPos(opponents[i]);
+				if(opponents[i].IDs == 0)
+				{
+					document.getElementById("score1").innerHTML = opponents[i].names + ": " + opponents[i].Score;
+					document.getElementById("color1").style.backgroundColor = opponents[i].Colors;
+				}
+				else if(opponents[i].IDs == 1)
+				{
+					document.getElementById("score2").innerHTML = opponents[i].names +": " + opponents[i].Score;
+					document.getElementById("color2").style.backgroundColor = opponents[i].Colors;
+				}
+				else if(opponents[i].IDs == 2)
+				{
+					document.getElementById("score3").innerHTML = opponents[i].names +": " + opponents[i].Score;
+					document.getElementById("color3").style.backgroundColor = opponents[i].Colors;
+				}
+				else
+				{
+					document.getElementById("score4").innerHTML = opponents[i].names +": " +opponents[i].Score;
+					document.getElementById("color4").style.backgroundColor = opponents[i].Colors;
+				}
 			}
 		}
         function updateGameArea() {
@@ -320,7 +442,22 @@
             myGamePiece.newPos();    
             myGamePiece.update();
 			updateOppPos();
-            document.getElementById("score1").innerHTML = uName + ": " + score;
+			if(ID == 0){
+				document.getElementById("score1").innerHTML = uName + ": " + score;
+				document.getElementById("color1").style.backgroundColor = paddleColor;
+			}
+			else if(ID == 1){
+				document.getElementById("score2").innerHTML = uName + ": " + score;
+				document.getElementById("color2").style.backgroundColor = paddleColor;
+			}
+			else if(ID == 2){
+				document.getElementById("score3").innerHTML = uName + ": " + score;
+				document.getElementById("color3").style.backgroundColor = paddleColor;
+			}
+			else {
+				document.getElementById("score4").innerHTML = uName + ": " + score;
+				document.getElementById("color4").style.backgroundColor = paddleColor;
+			}
         }
 	</script>
 </html>
