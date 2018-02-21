@@ -76,7 +76,7 @@
 			}
 			else if(id == 1)
 			{
-				arr = new Array(215,30,120,10);
+				arr = new Array(215,20,120,10);
 			}
 			else if(id == 2)
 			{
@@ -84,7 +84,7 @@
 			}
 			else if(id == 3)
 			{
-				arr = new Array(215,530,120,10);
+				arr = new Array(215,520,120,10);
 			}
 			return arr;
 		}
@@ -101,6 +101,7 @@
 		}
 		function structPlayer(name,id,color,oScore)
 		{
+			console.log(id);
 			var x = playerPos(parseInt(id));
 			var p = new paddle(x[2],x[3],color,x[0],x[1]);
 			var c = {
@@ -203,7 +204,7 @@
 				if(ID != parseInt(index[0]))
 				{
 					var newC = "#" + index[2];
-					var o = structPlayer(index[1],parseInt(index[0]),newC,0);
+					var o = structPlayer(index[1],index[0],newC,0);
 					opponents.push(o);
 				}
 			}
@@ -214,7 +215,9 @@
 			var index;
 			if(text.substring(0,4) == "Game")
 			{
-				var pLoad = text.split(":").pop();
+				var temp = text.split(":");
+				var pLoad = temp[1].split(":");
+				console.log(pLoad);
 				var res = pLoad.split(";");
 				Pos = res[0].split(",");
 				
@@ -231,17 +234,8 @@
 			}
 			if(text.substring(0,4) == "init")
 			{	
-				Pos = text.split(":").pop();
-				initPlayers(Pos);
-				/*var temp = Pos.split(";");
-				index = temp.split(",");
-				var newC = "#" + index[2]; 
-				if(ID != parseInt(index[0]))
-				{
-					var o = structPlayer(index[1],parseInt(index[0]),newC,0);
-					opponents.push(o);
-					o.Paddle.newOppPos(o);
-				}*/
+				Pos = text.split(":");
+				initPlayers(Pos[1]);
 			}
 		}
         
