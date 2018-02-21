@@ -20,7 +20,7 @@ void openHandler(int clientID){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }*/
-    server.wsSend(clientID, "");
+    server.wsSend(clientID, server.getPlayers());
 }
 
 /* called when a client disconnects */

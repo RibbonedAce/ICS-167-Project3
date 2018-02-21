@@ -23,7 +23,6 @@ void game::addPlayer(int id, string _name, int color) {
 	toAdd.score = 0;
 	removePlayer(id);
 	players[id] = new player(toAdd);
-
 }
 
 void game::removePlayer(int id) {
