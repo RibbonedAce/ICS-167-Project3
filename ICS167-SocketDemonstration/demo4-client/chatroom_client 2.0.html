@@ -101,7 +101,6 @@
 		}
 		function structPlayer(name,id,color,oScore)
 		{
-			console.log(id);
 			var x = playerPos(parseInt(id));
 			var p = new paddle(x[2],x[3],color,x[0],x[1]);
 			var c = {
@@ -213,10 +212,9 @@
 		{
 			var Pos;
 			var index;
-			if(text.substring(0,4) == "Game")
+			if(text.split(":")[0] == "Position")
 			{
-				var temp = text.split(":");
-				var pLoad = temp[1].split(":");
+				var pLoad = text.split(":")[1];
 				console.log(pLoad);
 				var res = pLoad.split(";");
 				Pos = res[0].split(",");
@@ -235,7 +233,8 @@
 			if(text.substring(0,4) == "init")
 			{	
 				Pos = text.split(":");
-				initPlayers(Pos[1]);
+				if(Pos.length != 1)
+					initPlayers(Pos[1]);
 			}
 		}
         
