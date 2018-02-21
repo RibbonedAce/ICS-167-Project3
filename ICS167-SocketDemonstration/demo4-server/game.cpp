@@ -19,7 +19,7 @@ void game::addPlayer(int id, string _name, int color) {
 	toAdd.name = _name;
 	toAdd.ready = 0;
 	toAdd.color = color;
-	toAdd.position = (X_BOUNDS + PADDLE_LENGTH) / 2;
+	toAdd.position = (X_BOUNDS - PADDLE_LENGTH) / 2;
 	toAdd.score = 0;
 	removePlayer(id);
 	players[id] = new player(toAdd);
