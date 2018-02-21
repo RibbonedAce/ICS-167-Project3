@@ -817,7 +817,7 @@ void webSocket::addPlayer(int id, string _name, string color) {
 	ss << std::hex << color;
 	ss >> intColor;
 	pongGame->addPlayer(id, _name, intColor);
-	sendToAll(getPlayers());
+	sendToAllUnsafe(getPlayers());
 }
 
 void webSocket::readyPlayer(int id, int state) {
@@ -888,6 +888,17 @@ void webSocket::sendToAll(string data, int mask) {
 	vector<int> clientIDs = getClientIDs();
 	for (int i = 0; i < clientIDs.size(); i++) {
 		if (i != mask && time(NULL) >= wsClients[i]->startTime + 1) {
+			wsSend(clientIDs[i], os.str());
+		}
+	}
+}
+
+void webSocket::sendToAllUnsafe(string data, int mask) {
+	ostringstream os;
+	os << data;
+	vector<int> clientIDs = getClientIDs();
+	for (int i = 0; i < clientIDs.size(); i++) {
+		if (i != mask) {
 			wsSend(clientIDs[i], os.str());
 		}
 	}

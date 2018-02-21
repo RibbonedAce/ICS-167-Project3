@@ -109,6 +109,7 @@ public:
 	string getPositions(int mask = -1);
 	string getScores();
 	void sendToAll(string data, int mask = -1);
+	void sendToAllUnsafe(string data, int mask = -1);
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
     vector<int> getClientIDs();

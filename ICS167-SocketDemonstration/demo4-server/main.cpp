@@ -54,7 +54,7 @@ void messageHandler(int clientID, string message)
 		server.addPlayer(clientID, message.substr(message.find(':') + 1, message.find(';') - message.find(':') - 1), message.substr(message.find(';') + 1));
 		ostringstream os;
 		os << "ID:" << clientID;
-		server.wsSend(clientIDs[clientID], os.str());
+		server.wsSend(clientID, os.str());
 	}
 	else if (prefix == "Position")
 	{
