@@ -327,13 +327,13 @@
 			{
 				if(!readyStatus)
 				{
-					Server.send("Ready:1");
+					send("Ready:1");
 					readyStatus = true;
 					document.getElementById("readyButton").innerHTML = "Cancel";
 				}
 				else
 				{
-					Server.send("Ready:0");
+					send("Ready:0");
 					readyStatus = false;
 					document.getElementById("readyButton").innerHTML = "Ready";
 				}
