@@ -63,7 +63,7 @@ void messageHandler(int clientID, string message)
 	}
 	else if (prefix == "Ready")
 	{
-		server.readyPlayer(clientID);
+		server.readyPlayer(clientID, stoi(message.substr(message.find(':') + 1)));
 	}
 	else
 	{

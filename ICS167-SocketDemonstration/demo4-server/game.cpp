@@ -17,7 +17,7 @@ using namespace std;
 void game::addPlayer(int id, string _name, int color) {
 	player toAdd;
 	toAdd.name = _name;
-	toAdd.ready = false;
+	toAdd.ready = 0;
 	toAdd.color = color;
 	toAdd.position = (X_BOUNDS + PADDLE_LENGTH) / 2;
 	toAdd.score = 0;
@@ -46,7 +46,7 @@ int game::getNumOfPlayers() {
 
 bool game::allReady() {
 	for (const auto& i : players) {
-		if (i == nullptr || !(i->ready)) {
+		if (i == nullptr || i->ready <= 0) {
 			return false;
 		}
 	}

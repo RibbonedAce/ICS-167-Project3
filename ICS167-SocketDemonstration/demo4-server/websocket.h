@@ -100,12 +100,12 @@ public:
     void stopServer();
 	bool gameIsPlaying();
 	void addPlayer(int id, string _name, string color);
-	void readyPlayer(int id);
+	void readyPlayer(int id, int state);
 	void removePlayer(int id);
 	void editPlayerPos(int index, float _position);
 	void updateGame();
 	//string getGameStats();
-	string getPlayer(int index);
+	string getPlayers();
 	string getPositions(int mask = -1);
 	string getScores();
 	void sendToAll(string data, int mask = -1);

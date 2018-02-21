@@ -16,7 +16,7 @@ struct xyCoords {
 
 struct player {
 	string name;
-	bool ready;
+	int ready;
 	int color;
 	float position;
 	int score;

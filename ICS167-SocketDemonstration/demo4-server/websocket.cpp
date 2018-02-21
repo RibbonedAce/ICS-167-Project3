@@ -821,12 +821,12 @@ void webSocket::addPlayer(int id, string _name, string color) {
 	ss << std::hex << color;
 	ss >> intColor;
 	pongGame->addPlayer(id, _name, intColor);
-	sendToAll(getPlayer(id), id);
+	sendToAll(getPlayers(), id);
 }
 
-void webSocket::readyPlayer(int id) {
+void webSocket::readyPlayer(int id, int state) {
 	if (pongGame->players[id] != nullptr) {
-		pongGame->players[id]->ready = true;
+		pongGame->players[id]->ready = state);
 	}
 }
 
@@ -852,15 +852,17 @@ void webSocket::updateGame() {
 	return result;
 }*/
 
-string webSocket::getPlayer(int index) {
+string webSocket::getPlayers() {
 	string result = "init:";
-	if (pongGame->players[index] != nullptr) {
-		result += to_string(index) + "," + pongGame->players[index]->name + ",";
-		std::stringstream ss;
-		ss << std::hex << pongGame->players[index]->color;
-		result += ss.str();
+	for (int i = 0; i < pongGame->players.size(); ++i) {
+		if (pongGame->players[i] != nullptr) {
+			result += to_string(i) + "," + pongGame->players[i]->name + ",";
+			std::stringstream ss;
+			ss << std::hex << pongGame->players[i]->color;
+			result += ss.str() + ";";
+		}
 	}
-	return result.substr(0);
+	return result.substr(0, result.length() - 1);
 }
 
 string webSocket::getPositions(int mask) {
