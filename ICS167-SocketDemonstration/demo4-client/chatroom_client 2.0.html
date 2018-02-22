@@ -345,13 +345,13 @@
 			
             gameBall = new ball();
         }
-        
         function disconnect()
 		{
 			myGameArea.clear();
 			document.getElementById("updateBar").innerHTML = "Disonnect";
 			Server.disconnect();
 			readyStatus = false;
+			isGamePlaying = false;
 		}
         
         function ready()
@@ -477,10 +477,13 @@
 				if (myGameArea.key && myGameArea.key == 40 && myGamePiece.y < 410) {myGamePiece.speedY = 2; }
 			}
             gameBall.newPos(xBall, yBall);
-            gameBall.update();
-            myGamePiece.newPos();    
+            myGamePiece.newPos();   
+			
+			if(isGamePlaying){
+			gameBall.update();
             myGamePiece.update();
 			updateOppPos();
+			}
 			if(ID == 0){
 				document.getElementById("score1").innerHTML = uName + ": " + myScore;
 				document.getElementById("color1").style.backgroundColor = paddleColor;
