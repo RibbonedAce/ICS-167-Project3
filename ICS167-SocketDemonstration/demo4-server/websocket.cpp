@@ -860,7 +860,11 @@ string webSocket::getPlayers() {
 			result += to_string(i) + "," + pongGame->players[i]->name + ",";
 			std::stringstream ss;
 			ss << std::hex << pongGame->players[i]->color;
-			result += ss.str() + ";";
+			string color = ss.str();
+			while (color.length() < 6) {
+				color = "0" + color;
+			}
+			result += color + ";";
 		}
 	}
 	return result.substr(0, result.length() - 1);
