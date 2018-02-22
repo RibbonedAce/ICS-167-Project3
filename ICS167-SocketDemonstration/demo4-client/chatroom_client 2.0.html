@@ -9,7 +9,7 @@
 <center><body>  
     
     <div class="serverContainer">
-        <div>IP: <input type="text" name="ip" value="127.0.0.1" id="ipEntry"></div>
+        <div>IP: <input type="text" name="ip" value="169.234.25.177" id="ipEntry"></div>
         <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
@@ -190,7 +190,7 @@
 			if(text.split(":")[0] == "Positions")
 			{
 				var pLoad = text.split(":")[1];
-				console.log(pLoad);
+				//console.log(pLoad);
 				var res = pLoad.split(";");
 				Pos = res[0].split(",");
 				
@@ -198,7 +198,7 @@
 				xBall = parseInt(Pos[0]);
 				yBall = parseInt(Pos[1]);
 				
-				console.log(opponents);
+				//console.log(opponents);
 				//Opponent update.
 				updateOpponentCoordinates(pLoad);
 			}
@@ -320,6 +320,21 @@
 					//myGameArea.start();
 					isGamePlaying = true;
 				}
+				else if(payload.split(":")[0] == "Disconnect")
+				{
+					//remove opponent at index.
+					var index = payload.split(":")[1];
+					opponents[parseInt(index)].Paddle = new paddle(0,0,"#ffffff",0,0);
+					opponents[parseInt(index)].Colors = "#ffffff";
+					opponents[parseInt(index)].Paddle.update();
+					aLength = 0;
+					isGamePlaying = false;
+					for(i = 0; i < opponents.length ; ++i)
+					{
+						opponents.slice(i,1);
+					}
+					console.log(opponents);
+				}
 				else
 				{
 					ProcessPayLoad(payload);
@@ -330,12 +345,13 @@
 			
             gameBall = new ball();
         }
-        
         function disconnect()
 		{
+			myGameArea.clear();
 			document.getElementById("updateBar").innerHTML = "Disonnect";
 			Server.disconnect();
 			readyStatus = false;
+			isGamePlaying = false;
 		}
         
         function ready()
@@ -461,10 +477,13 @@
 				if (myGameArea.key && myGameArea.key == 40 && myGamePiece.y < 410) {myGamePiece.speedY = 2; }
 			}
             gameBall.newPos(xBall, yBall);
-            gameBall.update();
-            myGamePiece.newPos();    
+            myGamePiece.newPos();   
+			
+			if(isGamePlaying){
+			gameBall.update();
             myGamePiece.update();
 			updateOppPos();
+			}
 			if(ID == 0){
 				document.getElementById("score1").innerHTML = uName + ": " + myScore;
 				document.getElementById("color1").style.backgroundColor = paddleColor;
