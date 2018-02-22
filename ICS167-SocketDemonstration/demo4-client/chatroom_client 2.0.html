@@ -137,20 +137,20 @@
 				if(ID == 0)
 				{
 					//opponent ID: 1
-					opponents[0].Paddle.setX(parseFloat(res[1].split(",")[1]));
+					opponents[1].Paddle.setX(parseFloat(res[1].split(",")[1]));
 					//opponent ID: 2
-					opponents[1].Paddle.setY(parseFloat(res[2].split(",")[1]));
+					opponents[2].Paddle.setY(parseFloat(res[2].split(",")[1]));
 					//opponent ID: 3
-					opponents[2].Paddle.setX(parseFloat(res[3].split(",")[1]));
+					opponents[3].Paddle.setX(parseFloat(res[3].split(",")[1]));
 				}
 				else if(ID == 1)
 				{
 					//opponent ID: 0
 					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
 					//opponent ID: 2
-					opponents[1].Paddle.setY(parseFloat(res[2].split(",")[1]));
+					opponents[2].Paddle.setY(parseFloat(res[2].split(",")[1]));
 					//opponent ID: 3
-					opponents[2].Paddle.setX(parseFloat(res[3].split(",")[1]));
+					opponents[3].Paddle.setX(parseFloat(res[3].split(",")[1]));
 				}
 				else if(ID == 2)
 				{
@@ -159,7 +159,7 @@
 					//opponent ID: 1
 					opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
 					//opponent ID: 3
-					opponents[2].Paddle.setX(parseFloat(res[3].split(",")[1]));
+					opponents[3].Paddle.setX(parseFloat(res[3].split(",")[1]));
 				}
 				else
 				{
@@ -177,13 +177,10 @@
 			for(i = aLength; i < temp.length; ++i)
 			{
 				var index = temp[i].split(",");
-				if(ID != parseInt(index[0]))
-				{
-					var newC = "#" + index[2];
-					var o = structPlayer(index[1],index[0],newC,0);
-					opponents.push(o);
-					aLength++;
-				}
+				var newC = "#" + index[2];
+				var o = structPlayer(index[1],index[0],newC,0);
+				opponents.push(o);
+				aLength++;
 			}
 		}
 		function ProcessPayLoad(text)
@@ -208,8 +205,8 @@
 			if(text.substring(0,4) == "init")
 			{	
 				Pos = text.split(":");
-				console.log(Pos[1]);
-				initPlayers(Pos[1]);
+				if(Pos.length != 1)
+					initPlayers(Pos[1]);
 			}
 			if(text.split(":")[0] == "Scores")
 			{
@@ -318,7 +315,7 @@
 					paddleH = PlayerPos[3];
 					myGamePiece = new paddle(paddleW,paddleH,paddleColor,xPaddle,yPaddle);
 				}
-				else if(payload == "Start Game")
+				else if(payload == "Start game")
 				{
 					//myGameArea.start();
 					isGamePlaying = true;
@@ -423,7 +420,10 @@
 		{
 			for(i = 0 ; i < opponents.length;i++)
 			{
-				opponents[i].Paddle.newOppPos(opponents[i]);
+				if(ID != parseInt(opponents[i].IDs))
+				{
+					opponents[i].Paddle.newOppPos(opponents[i]);
+				}
 				if(opponents[i].IDs == 0)
 				{
 					document.getElementById("score1").innerHTML = opponents[i].names + ": " + opponents[i].Score;
