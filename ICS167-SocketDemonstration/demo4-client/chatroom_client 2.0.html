@@ -190,7 +190,7 @@
 			if(text.split(":")[0] == "Positions")
 			{
 				var pLoad = text.split(":")[1];
-				console.log(pLoad);
+				//console.log(pLoad);
 				var res = pLoad.split(";");
 				Pos = res[0].split(",");
 				
@@ -198,7 +198,7 @@
 				xBall = parseInt(Pos[0]);
 				yBall = parseInt(Pos[1]);
 				
-				console.log(opponents);
+				//console.log(opponents);
 				//Opponent update.
 				updateOpponentCoordinates(pLoad);
 			}
@@ -319,6 +319,17 @@
 				{
 					//myGameArea.start();
 					isGamePlaying = true;
+				}
+				else if(payload.split(":")[0] == "Disonnect")
+				{
+					//remove opponent at index.
+					aLength = 0;
+					isGamePlaying = false;
+					for(i = 0; i < opponents.length < ++i)
+					{
+						opponents.slice(i,1);
+					}
+					console.log(opponents);
 				}
 				else
 				{
