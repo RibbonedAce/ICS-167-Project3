@@ -9,7 +9,7 @@
 <center><body>  
     
     <div class="serverContainer">
-        <div>IP: <input type="text" name="ip" value="169.234.25.177" id="ipEntry"></div>
+        <div>IP: <input type="text" name="ip" value="169.234.43.79" id="ipEntry"></div>
         <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
@@ -44,16 +44,23 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
 	<script>
-		
+		var timeStamp;
         var myGamePiece;
         var gameBall;
 		var isGamePlaying = false;
-		
+		var seconds = 1000;
 		var Server;
 		var uName;
         var myScore = 0;
 		var ID;
 		var readyStatus = false;
+		var latencies = [];
+		var client2ndTime;
+		var client1stTime;
+		var server1stTimeT1;
+		var server1stTimeT2;
+		var latency;
+		var next;
 		
 		var xBall=275;
 		var yBall=275;
@@ -100,6 +107,7 @@
 				}
 			}
 		}
+		
 		function structPlayer(name,id,color,oScore)
 		{
 			var x = playerPos(parseInt(id));
@@ -114,11 +122,23 @@
 			return c;
 		}
 		
+		function getTimeStamped(sendTime, receiveTime)
+		{
+			var timeStamp = {
+				Send: sendTime,
+				Receive: receiveTime
+			}
+			return timeStamp;
+		}
+		
         var myGameArea = {
             canvas : document.getElementById("gameCanvas") ,
             start : function() {
+				timeStamp = new Date();
+				next = timeStamp.getTime(); 
                 this.context = this.canvas.getContext("2d");
                 this.interval = setInterval(updateGameArea, 20);
+				this.interval = setInterval(sendTimeStamptoServer,seconds);
                 window.addEventListener('keydown', function (e) {
                     myGameArea.key = e.keyCode;
                 })
@@ -130,7 +150,27 @@
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
         }
-        
+        function sendTimeStamptoServer()
+		{
+			var temp = timeStamp.getTime() % 1000;
+			send("Time:" + temp.toString());
+		}
+		function sendTimef(txt)
+		{
+			if((timeStamp.getTime() / 1000) >= next)
+			{
+				var currentTime = timeStamp.getTime() % 1000;
+				client1stTime = parseInt(txt.split(";")[0]) % 1000;
+				server1stTimeT1 = parseInt(txt.split(";")[1]) % 1000;
+				server1stTimeT2 = parseInt(txt.split(";")[2]) % 1000;
+				latency = ((currentTime - client1stTime) - (server1stTimeT2 - client1stTimeT1)) / 2;
+				client2ndTime = timeStamp.getTime() % 1000;
+				send("Timef:" + server1stTimeT2.toString() + ";" + currentTime.toString() + ";" + client2ndTime.toString());
+				latencies.push(latency);
+				console.log(latency);
+				++next;
+			}
+		}
 		function updateOpponentCoordinates(text)
 		{
 				var res = text.split(";");
@@ -212,6 +252,10 @@
 			{
 				updateScores(text.split(":")[1]);
 			}
+			if(text.split(":")[0] == "Time")
+			{
+				sendTimef(text[1]);
+			}
 		}
         
 		function updateScores(score)
@@ -272,6 +316,7 @@
 				paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			}
 		}
+		
         function connect(){
             var ip = document.getElementById("ipEntry").value;
 			var port = document.getElementById("portEntry").value;
@@ -303,7 +348,7 @@
 			{
 				//log(payload);
 				//slice payload to get info for gamestate
-				document.getElementById("updateBar").innerHTML = payload;
+				//document.getElementById("updateBar").innerHTML = payload;
 				if(payload.substring(0,2) == "ID")
 				{
 					myGameArea.start();
@@ -501,5 +546,9 @@
 				document.getElementById("color4").style.backgroundColor = paddleColor;
 			}
         }
+		function updateBarBelow(text)
+		{
+			document.getElementById("updateBar").innerHTML = text;
+		}
 	</script>
 </html>
