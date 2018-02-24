@@ -15,6 +15,7 @@
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #define MAX_CLIENTS 4
+#define MEAN_LATENCY 200
 #endif
 
 #include <stdio.h>
@@ -162,6 +163,9 @@ bool webSocket::wsSendClientMessage(int clientID, unsigned char opcode, string m
         return true;
 
     // fetch message length
+	if (message.find(':') != -1 && message.substr(0, message.find(':')) == "Time") {
+		message += ";" + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
+	}
     int messageLength = message.size();
 
     // set max payload length per frame
@@ -679,6 +683,12 @@ void webSocket::startServer(int port){
     showAvailableIP();
 
 	pongGame = new game();
+	latency = vector<int>(MAX_CLIENTS);
+	for (int i = 0; i < MAX_CLIENTS; ++i) {
+		latency.push_back(0);
+	}
+	inQueue = vector<queueEntry*>();
+	outQueue = vector<queueEntry*>();
 
     int yes = 1;
     char buf[4096];
@@ -803,8 +813,8 @@ void webSocket::editPlayerPos(int index, float _position) {
 
 void webSocket::addPlayer(int id, string _name, string color) {
 	unsigned int intColor;
-	std::stringstream ss;
-	ss << std::hex << color;
+	stringstream ss;
+	ss << hex << color;
 	ss >> intColor;
 	pongGame->addPlayer(id, _name, intColor);
 	sendToAllUnsafe(getPlayers());
@@ -891,6 +901,18 @@ string webSocket::getScores() {
 	return result.substr(0, result.length() - 1);
 }
 
+string webSocket::getTime(int _time, string data) {
+	return "Time:" + data + ";" + to_string(_time);
+}
+
+void webSocket::recordTime(int id, int _time, string data) {
+	int mTime = stoi(data.substr(0, data.find(';')));
+	int tTime1 = stoi(data.substr(data.find(';') + 1, data.find(';', data.find(';') + 1)));
+	int tTime2 = stoi(data.substr(data.find(';', data.find(';') + 1)));
+	latency[id] = (carrySubtract(_time, mTime, 1000) - carrySubtract(tTime2, tTime1, 1000)) / 2;
+	printLatency();
+}
+
 void webSocket::sendToAll(string data, int mask) {
 	ostringstream os;
 	os << data;
@@ -911,4 +933,19 @@ void webSocket::sendToAllUnsafe(string data, int mask) {
 			wsSend(clientIDs[i], os.str());
 		}
 	}
+}
+
+void webSocket::printLatency() {
+	int result = 0;
+	for (auto& i : latency) {
+		result += i;
+	}
+	printf("Latency: %d", result / MAX_CLIENTS);
+}
+
+int webSocket::carrySubtract(int num1, int num2, int max) {
+	if (num1 < num2) {
+		num1 += max;
+	}
+	return num1 - num2;
 }

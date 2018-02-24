@@ -9,6 +9,7 @@
 
 #include <math.h>
 #include <string>
+#include <time.h>
 #include <vector>
 #include "game.h"
 
@@ -56,11 +57,12 @@ void game::updateBall() {
 	if (!running && allReady()) {
 		startGame();
 	}
+	clock_t currentTime = clock();
 	if (running) {
 		lastBallPos.x = ballPos.x;
 		lastBallPos.y = ballPos.y;
-		ballPos.x += cos(ballDirection * M_PI / 180);
-		ballPos.y += sin(ballDirection * M_PI / 180);
+		ballPos.x += (float)(currentTime - lastTime) / CLOCKS_PER_SEC * 60 * cos(ballDirection * M_PI / 180);
+		ballPos.y += (float)(currentTime - lastTime) / CLOCKS_PER_SEC * 60 * sin(ballDirection * M_PI / 180);
 		if (ballPos.y + BALL_RADIUS > Y_BOUNDS || ballPos.y - BALL_RADIUS < 0 ||
 			ballPos.x + BALL_RADIUS > X_BOUNDS || ballPos.x - BALL_RADIUS < 0) {
 			changeScore(lastPlayerHit, 1);
@@ -91,6 +93,7 @@ void game::updateBall() {
 			lastPlayerHit = 3;
 		}
 	}
+	lastTime = currentTime;
 }
 
 void game::resetBall() {

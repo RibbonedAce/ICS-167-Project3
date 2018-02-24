@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <time.h>
+#include <chrono>
 #include "game.h"
 
 using namespace std;
@@ -48,6 +49,11 @@ typedef void (*messageCallback)(int, string);
 
 #define WS_TIMEOUT_RECV 10
 #define WS_TIMEOUT_PONG 5
+
+struct queueEntry {
+	string data;
+	long long timeToDie;
+};
 
 class wsClient{
 public:
@@ -109,8 +115,12 @@ public:
 	string getPlayers();
 	string getPositions(int mask = -1);
 	string getScores();
+	string getTime(int _time, string data);
+	void recordTime(int id, int _time, string data);
 	void sendToAll(string data, int mask = -1);
 	void sendToAllUnsafe(string data, int mask = -1);
+	void addToInQueue(string data);
+	void addToOutQueue(string data);
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
     vector<int> getClientIDs();
@@ -123,7 +133,10 @@ private:
     fd_set fds;
     int fdmax;
     int listenfd;
-
+	vector<int> latency;
+	vector<queueEntry*> inQueue;
+	vector<queueEntry*> outQueue;
+	
     void wsCheckIdleClients();
     bool wsSendClientMessage(int clientID, unsigned char opcode, string message);
     void wsSendClientClose(int clientID, unsigned short status = -1);
@@ -136,6 +149,9 @@ private:
     bool wsProcessClient(int clientID, char *buffer, int bufferLength);
     int wsGetNextClientID();
     void wsAddClient(int socket, in_addr ip);
+	void printLatency();
+	void checkQueues();
+	int carrySubtract(int num1, int num2, int max);
 
     defaultCallback callOnOpen;
     defaultCallback callOnClose;

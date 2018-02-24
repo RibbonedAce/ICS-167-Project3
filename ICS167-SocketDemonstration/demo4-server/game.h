@@ -5,6 +5,7 @@
 #define MAX_PLAYERS 4
 
 #include <string>
+#include <time.h>
 #include <vector>
 
 using namespace std;
@@ -61,6 +62,7 @@ public:
 
 private:
 	xyCoords lastBallPos;
+	clock_t lastTime;
 
 	void flipBallVertical();
 	void flipBallHorizontal();
