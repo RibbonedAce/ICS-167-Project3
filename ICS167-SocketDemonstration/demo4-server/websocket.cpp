@@ -908,7 +908,7 @@ string webSocket::getTime(int _time, string data) {
 void webSocket::recordTime(int id, int _time, string data) {
 	int mTime = stoi(data.substr(0, data.find(';')));
 	int tTime1 = stoi(data.substr(data.find(';') + 1, data.find(';', data.find(';') + 1)));
-	int tTime2 = stoi(data.substr(data.find(';', data.find(';') + 1)));
+	int tTime2 = stoi(data.substr(data.find(';', data.find(';') + 1) + 1));
 	latency[id] = (carrySubtract(_time, mTime, 1000) - carrySubtract(tTime2, tTime1, 1000)) / 2;
 	printLatency();
 }
@@ -940,7 +940,7 @@ void webSocket::printLatency() {
 	for (auto& i : latency) {
 		result += i;
 	}
-	printf("Latency: %d", result / MAX_CLIENTS);
+	printf("Latency: %d,%d,%d,%d\n", latency[0], latency[1], latency[2], latency[3]);
 }
 
 int webSocket::carrySubtract(int num1, int num2, int max) {
