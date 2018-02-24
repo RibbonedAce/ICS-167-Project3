@@ -836,11 +836,7 @@ void webSocket::updateGame() {
 
 void webSocket::checkEvents() {
 	if (pongGame->running) {
-		for (int i = 0; i < MAX_CLIENTS; ++i) {
-			if (pongGame->players[i] != nullptr) {
-				wsSend(i, getPositions(i));
-			}
-		}
+		sendToAll(getPositions());
 	}
 	if (pongGame->scored) {
 		pongGame->scored = false;
