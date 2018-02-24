@@ -134,11 +134,10 @@
         var myGameArea = {
             canvas : document.getElementById("gameCanvas") ,
             start : function() {
-				timeStamp = new Date();
-				next = timeStamp.getTime(); 
+				next = resetDateObject() / 1000; 
+				setInterval(sendTimeStamptoServer,seconds);
                 this.context = this.canvas.getContext("2d");
                 this.interval = setInterval(updateGameArea, 20);
-				this.interval = setInterval(sendTimeStamptoServer,seconds);
                 window.addEventListener('keydown', function (e) {
                     myGameArea.key = e.keyCode;
                 })
@@ -150,25 +149,41 @@
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
         }
+		
+		function resetDateObject()
+		{
+			timeStamp = new Date();
+			return timeStamp.getTime();
+			
+		}
+		
         function sendTimeStamptoServer()
 		{
-			var temp = timeStamp.getTime() % 1000;
+			var temp = resetDateObject() % 1000;
 			send("Time:" + temp.toString());
+		}
+		
+		function carrySubstract(num1,num2,max)
+		{
+			if(num1 < num2)
+				num1 += max;
+			return num1 - num2;
 		}
 		function sendTimef(txt)
 		{
-			if((timeStamp.getTime() / 1000) >= next)
+			if((resetDateObject() / 1000) >= next)
 			{
-				var currentTime = timeStamp.getTime() % 1000;
-				client1stTime = parseInt(txt.split(";")[0]) % 1000;
-				server1stTimeT1 = parseInt(txt.split(";")[1]) % 1000;
-				server1stTimeT2 = parseInt(txt.split(";")[2]) % 1000;
-				latency = ((currentTime - client1stTime) - (server1stTimeT2 - client1stTimeT1)) / 2;
-				client2ndTime = timeStamp.getTime() % 1000;
-				send("Timef:" + server1stTimeT2.toString() + ";" + currentTime.toString() + ";" + client2ndTime.toString());
+				var currentTime = resetDateObject() % 1000;
+				client1stTime = parseInt(txt.split(";")[0]);
+				server1stTimeT1 = parseInt(txt.split(";")[1]);
+				server1stTimeT2 = parseInt(txt.split(";")[2]);
+				client2ndTime = resetDateObject() % 1000;
+				latency = (carrySubstract(currentTime,client1stTime,1000) - carrySubstract(server1stTimeT2,server1stTimeT1,1000)) / 2;
+				client2ndTime = resetDateObject() % 1000;
+				send("TimeF:" + server1stTimeT2.toString() + ";" + currentTime.toString() + ";" + client2ndTime.toString());
 				latencies.push(latency);
 				console.log(latency);
-				++next;
+				next += 1;
 			}
 		}
 		function updateOpponentCoordinates(text)
@@ -254,7 +269,7 @@
 			}
 			if(text.split(":")[0] == "Time")
 			{
-				sendTimef(text[1]);
+				sendTimef(text.split(":")[1]);
 			}
 		}
         
@@ -330,7 +345,6 @@
 					$(this).val('');
 				}
 			});
-
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("connectButton").disabled = true;
@@ -348,7 +362,7 @@
 			{
 				//log(payload);
 				//slice payload to get info for gamestate
-				//document.getElementById("updateBar").innerHTML = payload;
+				updateBarBelow(payload);
 				if(payload.substring(0,2) == "ID")
 				{
 					myGameArea.start();
