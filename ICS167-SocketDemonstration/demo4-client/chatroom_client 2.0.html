@@ -9,7 +9,7 @@
 <center><body>  
     
     <div class="serverContainer">
-        <div>IP: <input type="text" name="ip" value="169.234.43.79" id="ipEntry"></div>
+        <div>IP: <input type="text" name="ip" value="169.234.34.154" id="ipEntry"></div>
         <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
@@ -61,6 +61,8 @@
 		var server1stTimeT2;
 		var latency;
 		var next;
+		var textFile;
+		var currentTime;
 		
 		var xBall=275;
 		var yBall=275;
@@ -122,14 +124,14 @@
 			return c;
 		}
 		
-		function getTimeStamped(sendTime, receiveTime)
+		/*function getTimeStamped(sendTime, receiveTime)
 		{
 			var timeStamp = {
 				Send: sendTime,
 				Receive: receiveTime
 			}
 			return timeStamp;
-		}
+		}*/
 		
         var myGameArea = {
             canvas : document.getElementById("gameCanvas") ,
@@ -161,6 +163,7 @@
 		{
 			var temp = resetDateObject() % 1000;
 			send("Time:" + temp.toString());
+			console.log("Time sent");
 		}
 		
 		function carrySubstract(num1,num2,max)
@@ -173,58 +176,31 @@
 		{
 			if((resetDateObject() / 1000) >= next)
 			{
-				var currentTime = resetDateObject() % 1000;
 				client1stTime = parseInt(txt.split(";")[0]);
 				server1stTimeT1 = parseInt(txt.split(";")[1]);
 				server1stTimeT2 = parseInt(txt.split(";")[2]);
-				client2ndTime = resetDateObject() % 1000;
+				//calculate latency
 				latency = (carrySubstract(currentTime,client1stTime,1000) - carrySubstract(server1stTimeT2,server1stTimeT1,1000)) / 2;
+				//send server latency check points
 				client2ndTime = resetDateObject() % 1000;
 				send("TimeF:" + server1stTimeT2.toString() + ";" + currentTime.toString() + ";" + client2ndTime.toString());
 				latencies.push(latency);
 				console.log(latency);
 				next += 1;
+				console.log("TimeF sent");
 			}
 		}
 		function updateOpponentCoordinates(text)
 		{
 				var res = text.split(";");
-				if(ID == 0)
-				{
-					//opponent ID: 1
-					opponents[1].Paddle.setX(parseFloat(res[1].split(",")[1]));
-					//opponent ID: 2
-					opponents[2].Paddle.setY(parseFloat(res[2].split(",")[1]));
-					//opponent ID: 3
-					opponents[3].Paddle.setX(parseFloat(res[3].split(",")[1]));
-				}
-				else if(ID == 1)
-				{
-					//opponent ID: 0
-					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
-					//opponent ID: 2
-					opponents[2].Paddle.setY(parseFloat(res[2].split(",")[1]));
-					//opponent ID: 3
-					opponents[3].Paddle.setX(parseFloat(res[3].split(",")[1]));
-				}
-				else if(ID == 2)
-				{
-					//opponent ID: 0				
-					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
-					//opponent ID: 1
-					opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
-					//opponent ID: 3
-					opponents[3].Paddle.setX(parseFloat(res[3].split(",")[1]));
-				}
-				else
-				{
-					//opponent ID: 0
-					opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
-					//opponent ID: 1
-					opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
-					//opponent ID: 2
-					opponents[2].Paddle.setY(parseFloat(res[3].split(",")[1]));
-				}
+				//Player's position.
+				opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
+				//opponent ID: 1
+				opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
+				//opponent ID: 2
+				opponents[2].Paddle.setY(parseFloat(res[3].split(",")[1]));
+				//opponent ID: 3
+				opponents[3].Paddle.setX(parseFloat(res[4].split(",")[1]));
 		}
 		function initPlayers(strng)
 		{
@@ -331,6 +307,17 @@
 				paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			}
 		}
+		function assignTextFile()
+		{
+			if(ID == 0)
+				textFile = "/Client0.txt";
+			else if(ID == 1)
+				textFile = "/Client1.txt";
+			else if(ID == 2)
+				textFile = "/Client2.txt";
+			else if(ID == 3)
+				textFile = "/Client3.txt";
+		}
 		
         function connect(){
             var ip = document.getElementById("ipEntry").value;
@@ -360,6 +347,7 @@
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
+				currentTime = resetDateObject() % 1000;
 				//log(payload);
 				//slice payload to get info for gamestate
 				updateBarBelow(payload);
@@ -373,6 +361,7 @@
 					paddleW = PlayerPos[2];
 					paddleH = PlayerPos[3];
 					myGamePiece = new paddle(paddleW,paddleH,paddleColor,xPaddle,yPaddle);
+					assignTextFile();
 				}
 				else if(payload == "Start game")
 				{
@@ -440,19 +429,23 @@
             this.speedY = 0; 
             this.x = parseFloat(x);
             this.y = parseFloat(y);    
-            this.update = function() {
+            this.update = function(numID) {
                 ctx = this.gamearea.context;
 				ctx.fillStyle = color;
+				this.x = opponents[ID].Paddle.x;
+				this.y = opponents[ID].Paddle.y;
 				ctx.fillRect(this.x, this.y, this.width, this.height);
             }
             this.newPos = function() {
 				if(isGamePlaying){
-					this.x += this.speedX;
-					this.y += this.speedY; 
+					var xTemp = this.x;
+					var yTemp = this.y; 
+					xTemp += this.speedX;
+					yTemp += this.speedY; 
 					if(ID == 0 || ID == 2)
-						send("Position:"+this.y.toString());
+						send("Position:"+ yTemp.toString());
 					else 
-						send("Position:"+this.x.toString());
+						send("Position:"+ xTemp.toString());
 				}
             }
 			this.newOppPos = function(opponent)
@@ -495,10 +488,7 @@
 		{
 			for(i = 0 ; i < opponents.length;i++)
 			{
-				if(ID != parseInt(opponents[i].IDs))
-				{
-					opponents[i].Paddle.newOppPos(opponents[i]);
-				}
+				opponents[i].Paddle.newOppPos(opponents[i]);
 				if(opponents[i].IDs == 0)
 				{
 					document.getElementById("score1").innerHTML = opponents[i].names + ": " + opponents[i].Score;
@@ -540,8 +530,8 @@
 			
 			if(isGamePlaying){
 			gameBall.update();
-            myGamePiece.update();
 			updateOppPos();
+			myGamePiece.update(ID);
 			}
 			if(ID == 0){
 				document.getElementById("score1").innerHTML = uName + ": " + myScore;
