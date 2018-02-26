@@ -70,12 +70,12 @@ void messageHandler(int clientID, string message)
 	else if (prefix == "Time")
 	{
 		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
-		server.wsSend(clientID, server.getTime(time, message.substr(message.find(':' + 1))));
+		server.wsSend(clientID, server.getTime(time, message.substr(message.find(':') + 1)));
 	}
 	else if (prefix == "TimeF")
 	{
 		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
-		server.recordTime(clientID, time, message.substr(message.find(':' + 1)));
+		server.recordTime(clientID, time, message.substr(message.find(':') + 1));
 	}
 	else
 	{
