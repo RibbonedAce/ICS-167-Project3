@@ -49,38 +49,7 @@ void messageHandler(int clientID, string message)
 		if (clientIDs[i] != clientID)
 			server.wsSend(clientIDs[i], os.str());
 	}*/
-	vector<int> clientIDs = server.getClientIDs();
-	string prefix = message.substr(0, message.find(':'));
-	if (prefix == "Name")
-	{
-		server.addPlayer(clientID, message.substr(message.find(':') + 1, message.find(';') - message.find(':') - 1), message.substr(message.find(';') + 1));
-		ostringstream os;
-		os << "ID:" << clientID;
-		server.wsSend(clientID, os.str());
-	}
-	else if (prefix == "Position")
-	{
-		float newPos = stof(message.substr(message.find(':') + 1));
-		server.editPlayerPos(clientID, newPos);
-	}
-	else if (prefix == "Ready")
-	{
-		server.readyPlayer(clientID, stoi(message.substr(message.find(':') + 1)));
-	}
-	else if (prefix == "Time")
-	{
-		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
-		server.wsSend(clientID, server.getTime(time, message.substr(message.find(':') + 1)));
-	}
-	else if (prefix == "TimeF")
-	{
-		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
-		server.recordTime(clientID, time, message.substr(message.find(':') + 1));
-	}
-	else
-	{
-		printf("Unknown prefix");
-	}
+	server.addToInQueue(new queueEntry(clientID, message));
 }
 
 /* called once per select() loop */
@@ -105,8 +74,6 @@ void periodicHandler()
         //next = time(NULL) + 1;
 		
     }
-
-	
 }
 
 int main(int argc, char *argv[]){

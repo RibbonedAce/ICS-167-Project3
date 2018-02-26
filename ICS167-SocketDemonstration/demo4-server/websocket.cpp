@@ -15,7 +15,6 @@
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #define MAX_CLIENTS 4
-#define MEAN_LATENCY 200
 #endif
 
 #include <stdio.h>
@@ -163,9 +162,6 @@ bool webSocket::wsSendClientMessage(int clientID, unsigned char opcode, string m
         return true;
 
     // fetch message length
-	if (message.find(':') != -1 && message.substr(0, message.find(':')) == "Time") {
-		message += ";" + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
-	}
     int messageLength = message.size();
 
     // set max payload length per frame
@@ -771,6 +767,7 @@ void webSocket::startServer(int port){
 
 		updateGame();
 		checkEvents();
+		checkQueues();
 		
         if (callPeriodic != NULL)
             callPeriodic();
@@ -834,18 +831,56 @@ void webSocket::updateGame() {
 	pongGame->updateBall();
 }
 
+void webSocket::handleMessage(int id, string message) {
+	string prefix = message.substr(0, message.find(':'));
+	if (prefix == "Name")
+	{
+		addPlayer(id, message.substr(message.find(':') + 1, message.find(';') - message.find(':') - 1), message.substr(message.find(';') + 1));
+		ostringstream os;
+		os << "ID:" << id;
+		outQueue.push_back(new queueEntry(id, os.str()));
+	}
+	else if (prefix == "Position")
+	{
+		float newPos = stof(message.substr(message.find(':') + 1));
+		editPlayerPos(id, newPos);
+	}
+	else if (prefix == "Ready")
+	{
+		readyPlayer(id, stoi(message.substr(message.find(':') + 1)));
+	}
+	else if (prefix == "Time")
+	{
+		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
+		outQueue.push_back(new queueEntry(id, getTime(time, message.substr(message.find(':') + 1) + ";" +
+			   to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000))));
+	}
+	else if (prefix == "TimeF")
+	{
+		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
+		recordTime(id, time, message.substr(message.find(':') + 1));
+	}
+	else
+	{
+		printf("Unknown prefix");
+	}
+}
+
+void webSocket::addToInQueue(queueEntry* q) {
+	inQueue.push_back(q);
+}
+
 void webSocket::checkEvents() {
 	if (pongGame->running) {
-		sendToAll(getPositions());
+		outQueue.push_back(new queueEntry(-1, getPositions()));
 	}
 	if (pongGame->scored) {
 		pongGame->scored = false;
-		sendToAll(getScores());
+		outQueue.push_back(new queueEntry(-1, getScores()));
 	}
-	
 	if (pongGame->started) {
 		pongGame->started = false;
-		sendToAll("Start game");
+		outQueue.push_back(new queueEntry(-1, "Start game"));
 	}
 }
 
@@ -936,7 +971,35 @@ void webSocket::printLatency() {
 	for (auto& i : latency) {
 		result += i;
 	}
-	printf("Latency: %d,%d,%d,%d\n", latency[0], latency[1], latency[2], latency[3]);
+	printf("Latency: %d\n", result / MAX_CLIENTS);
+}
+
+void webSocket::checkQueues() {
+	for (int i = 0; i < inQueue.size();) {
+		if (clock() >= inQueue[i]->timeToDie) {
+			handleMessage(inQueue[i]->id, inQueue[i]->data);
+			delete(inQueue[i]);
+			inQueue.erase(inQueue.begin() + i);
+		}
+		else {
+			++i;
+		}
+	}
+	for (int o = 0; o < outQueue.size();) {
+		if (clock() >= outQueue[o]->timeToDie) {
+			if (outQueue[o]->id < 0) {
+				sendToAll(outQueue[o]->data);
+			}
+			else {
+				wsSend(outQueue[o]->id, outQueue[o]->data);
+			}
+			delete(outQueue[o]);
+			outQueue.erase(outQueue.begin() + o);
+		}
+		else {
+			++o;
+		}
+	}
 }
 
 int webSocket::carrySubtract(int num1, int num2, int max) {

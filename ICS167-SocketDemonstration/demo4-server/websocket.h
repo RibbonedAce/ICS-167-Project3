@@ -21,6 +21,10 @@ typedef void (*nullCallback)();
 typedef void (*defaultCallback)(int);
 typedef void (*messageCallback)(int, string);
 
+#define MIN_LATENCY 0
+#define MAX_LATENCY 800
+#define LATENCY_MODE 1
+
 #define WS_FIN 128
 #define WS_MASK 128
 
@@ -51,8 +55,28 @@ typedef void (*messageCallback)(int, string);
 #define WS_TIMEOUT_PONG 5
 
 struct queueEntry {
+	int id;
 	string data;
 	long long timeToDie;
+
+	queueEntry(int _id, string _data) {
+		id = _id;
+		data = _data;
+		switch (LATENCY_MODE) {
+		case 0:
+			timeToDie = clock() + (MIN_LATENCY + MAX_LATENCY) / 2;
+			break;
+		case 1:
+			timeToDie = clock() + rand() % (MAX_LATENCY - MIN_LATENCY) + MIN_LATENCY;
+			break;
+		case 2:
+			timeToDie = clock() + min(MIN_LATENCY + clock() / 100, MAX_LATENCY);
+			break;
+		default:
+			timeToDie = clock();
+			break;
+		}
+	}
 };
 
 class wsClient{
@@ -110,6 +134,8 @@ public:
 	void removePlayer(int id);
 	void editPlayerPos(int index, float _position);
 	void updateGame();
+	void handleMessage(int id, string message);
+	void addToInQueue(queueEntry* q);
 	void checkEvents();
 	//string getGameStats();
 	string getPlayers();
@@ -119,8 +145,6 @@ public:
 	void recordTime(int id, int _time, string data);
 	void sendToAll(string data, int mask = -1);
 	void sendToAllUnsafe(string data, int mask = -1);
-	void addToInQueue(string data);
-	void addToOutQueue(string data);
     bool wsSend(int clientID, string message, bool binary = false);
     void wsClose(int clientID);
     vector<int> getClientIDs();
