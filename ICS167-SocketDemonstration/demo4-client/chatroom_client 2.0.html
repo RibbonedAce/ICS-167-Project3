@@ -9,7 +9,7 @@
 <center><body>  
     
     <div class="serverContainer">
-        <div>IP: <input type="text" name="ip" value="169.234.35.180" id="ipEntry"></div>
+        <div>IP: <input type="text" name="ip" value="127.0.0.1" id="ipEntry"></div>
         <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
@@ -167,7 +167,7 @@
 		{
 			var temp = resetDateObject() % 10000;
 			send("Time:" + temp.toString());
-			console.log("Time sent");
+			//console.log("Time sent");
 		}
 		
 		function carrySubstract(num1,num2,max)
@@ -355,7 +355,7 @@
 				currentTime = resetDateObject() % 10000;
 				//log(payload);
 				//slice payload to get info for gamestate
-				//updateBarBelow(payload);
+				updateBarBelow(payload);
 				if(payload.substring(0,2) == "ID")
 				{
 					ID = parseInt(payload.substring(3,payload.length));
@@ -377,10 +377,31 @@
 				}
 				else if(payload.split(":")[0] == "Disconnect")
 				{
-					updateBarBelow("Hello?!");
 					//remove opponent at index.
 					var index = payload.split(":")[1];
 					console.log(index);
+					opponents[index].Paddle = new paddle(0,0,"#ffffff",0,0);
+					opponents[index].Paddle.update();
+					if(index == 0)
+					{
+						document.getElementById("score1").innerHTML = "";
+						document.getElementById("color1").style.backgroundColor = "#ffffff";
+					}
+					else if(index == 1)
+					{
+						document.getElementById("score2").innerHTML = "";
+						document.getElementById("color2").style.backgroundColor = "#ffffff";
+					}
+					else if(index == 2)
+					{
+						document.getElementById("score3").innerHTML = "";
+						document.getElementById("color3").style.backgroundColor = "#ffffff";
+					}
+					else if(index == 3)
+					{
+						document.getElementById("score4").innerHTML = "";
+						document.getElementById("color4").style.backgroundColor = "#ffffff";
+					}
 					updateBarBelow("Done deleting disconnected player");
 				}
 				else
@@ -396,9 +417,8 @@
         function disconnect()
 		{
 			//if(isGamePlaying){
-				myGameArea.clear();
+			myGameArea.clear();
 			//}
-			document.getElementById("updateBar").innerHTML = "Disonnect";
 			Server.disconnect();
 			readyStatus = false;
 			isGamePlaying = false;
