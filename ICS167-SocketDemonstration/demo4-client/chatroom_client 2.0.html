@@ -9,7 +9,7 @@
 <center><body>  
     
     <div class="serverContainer">
-        <div>IP: <input type="text" name="ip" value="169.234.34.154" id="ipEntry"></div>
+        <div>IP: <input type="text" name="ip" value="169.234.35.180" id="ipEntry"></div>
         <div>Port: <input type="text" name="port" value="8082" id="portEntry"></div>
         <div>Name: <input type="text" name="name" value="Bob" id="nameEntry"></div>
         <div><button type="button" onclick="connect();", id="connectButton">Connect</button></div>
@@ -44,6 +44,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
 	<script>
+		//import System.IO;
 		var timeStamp;
         var myGamePiece;
         var gameBall;
@@ -67,6 +68,7 @@
 		var xBall=275;
 		var yBall=275;
 		
+		
 		var xPaddle;
 		var yPaddle;
 		var paddleW;
@@ -74,6 +76,8 @@
         var paddleColor = "#ffffff";
 		var opponents = [];
 		var aLength = 0;
+		var xPaddleTemp;
+		var yPaddleTemp;
 		
 		var dx=5;
 		var dy=5;
@@ -124,14 +128,14 @@
 			return c;
 		}
 		
-		/*function getTimeStamped(sendTime, receiveTime)
+		function getTimeStamped(latency, receiveTime)
 		{
 			var timeStamp = {
-				Send: sendTime,
+				Latency: latency,
 				Receive: receiveTime
 			}
 			return timeStamp;
-		}*/
+		}
 		
         var myGameArea = {
             canvas : document.getElementById("gameCanvas") ,
@@ -161,7 +165,7 @@
 		
         function sendTimeStamptoServer()
 		{
-			var temp = resetDateObject() % 1000;
+			var temp = resetDateObject() % 10000;
 			send("Time:" + temp.toString());
 			console.log("Time sent");
 		}
@@ -180,14 +184,13 @@
 				server1stTimeT1 = parseInt(txt.split(";")[1]);
 				server1stTimeT2 = parseInt(txt.split(";")[2]);
 				//calculate latency
-				latency = (carrySubstract(currentTime,client1stTime,1000) - carrySubstract(server1stTimeT2,server1stTimeT1,1000)) / 2;
+				latency = (carrySubstract(currentTime,client1stTime,10000) - carrySubstract(server1stTimeT2,server1stTimeT1,10000)) / 2;
 				//send server latency check points
-				client2ndTime = resetDateObject() % 1000;
+				client2ndTime = resetDateObject() % 10000;
 				send("TimeF:" + server1stTimeT2.toString() + ";" + currentTime.toString() + ";" + client2ndTime.toString());
-				latencies.push(latency);
-				console.log(latency);
+				var LaObject = getTimeStamped(latency,currentTime);
+				latencies.push(LaObject);
 				next += 1;
-				console.log("TimeF sent");
 			}
 		}
 		function updateOpponentCoordinates(text)
@@ -232,6 +235,7 @@
 				//console.log(opponents);
 				//Opponent update.
 				updateOpponentCoordinates(pLoad);
+				//myGameArea.clear();
 			}
 			if(text.substring(0,4) == "init")
 			{	
@@ -309,14 +313,14 @@
 		}
 		function assignTextFile()
 		{
-			if(ID == 0)
+			/*if(ID == 0)
 				textFile = "/Client0.txt";
 			else if(ID == 1)
-				textFile = "/Client1.txt";
+				textFile = new StreamWriter("/Client1.txt");
 			else if(ID == 2)
-				textFile = "/Client2.txt";
+				textFile = new StreamWriter("/Client2.txt");
 			else if(ID == 3)
-				textFile = "/Client3.txt";
+				textFile = new StreamWriter("/Client3.txt");*/
 		}
 		
         function connect(){
@@ -341,27 +345,30 @@
 
 			//OH NOES! Disconnection occurred.
 			Server.bind('close', function( data ) {
+				
                 document.getElementById("connectButton").disabled = false;
 			});
 
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				currentTime = resetDateObject() % 1000;
+				currentTime = resetDateObject() % 10000;
 				//log(payload);
 				//slice payload to get info for gamestate
-				updateBarBelow(payload);
+				//updateBarBelow(payload);
 				if(payload.substring(0,2) == "ID")
 				{
-					myGameArea.start();
 					ID = parseInt(payload.substring(3,payload.length));
 					var PlayerPos = playerPos(ID);
 					xPaddle = PlayerPos[0];
 					yPaddle = PlayerPos[1];
 					paddleW = PlayerPos[2];
 					paddleH = PlayerPos[3];
+					xPaddleTemp = xPaddle;
+					yPaddleTemp = yPaddle;
 					myGamePiece = new paddle(paddleW,paddleH,paddleColor,xPaddle,yPaddle);
 					assignTextFile();
+					myGameArea.start();
 				}
 				else if(payload == "Start game")
 				{
@@ -370,18 +377,11 @@
 				}
 				else if(payload.split(":")[0] == "Disconnect")
 				{
+					updateBarBelow("Hello?!");
 					//remove opponent at index.
 					var index = payload.split(":")[1];
-					opponents[parseInt(index)].Paddle = new paddle(0,0,"#ffffff",0,0);
-					opponents[parseInt(index)].Colors = "#ffffff";
-					opponents[parseInt(index)].Paddle.update();
-					aLength = 0;
-					isGamePlaying = false;
-					for(i = 0; i < opponents.length ; ++i)
-					{
-						opponents.slice(i,1);
-					}
-					console.log(opponents);
+					console.log(index);
+					updateBarBelow("Done deleting disconnected player");
 				}
 				else
 				{
@@ -395,13 +395,28 @@
         }
         function disconnect()
 		{
-			myGameArea.clear();
+			//if(isGamePlaying){
+				myGameArea.clear();
+			//}
 			document.getElementById("updateBar").innerHTML = "Disonnect";
 			Server.disconnect();
 			readyStatus = false;
 			isGamePlaying = false;
+			eraseEverything();
 		}
         
+		function eraseEverything()
+		{
+			document.getElementById("score1").innerHTML = "";
+			document.getElementById("color1").style.backgroundColor = "#ffffff";
+			document.getElementById("score2").innerHTML = "";
+			document.getElementById("color2").style.backgroundColor = "#ffffff";
+			document.getElementById("score3").innerHTML = "";
+			document.getElementById("color3").style.backgroundColor = "#ffffff";
+			document.getElementById("score4").innerHTML = "";
+			document.getElementById("color4").style.backgroundColor = "#ffffff";
+		}
+		
         function ready()
 		{
 			if(!isGamePlaying)
@@ -438,14 +453,12 @@
             }
             this.newPos = function() {
 				if(isGamePlaying){
-					var xTemp = this.x;
-					var yTemp = this.y; 
-					xTemp += this.speedX;
-					yTemp += this.speedY; 
+					xPaddleTemp += this.speedX;
+					yPaddleTemp += this.speedY; 
 					if(ID == 0 || ID == 2)
-						send("Position:"+ yTemp.toString());
+						send("Position:"+ yPaddleTemp.toString());
 					else 
-						send("Position:"+ xTemp.toString());
+						send("Position:"+ xPaddleTemp.toString());
 				}
             }
 			this.newOppPos = function(opponent)
@@ -488,7 +501,8 @@
 		{
 			for(i = 0 ; i < opponents.length;i++)
 			{
-				opponents[i].Paddle.newOppPos(opponents[i]);
+				if(ID != i)
+					opponents[i].Paddle.newOppPos(opponents[i]);
 				if(opponents[i].IDs == 0)
 				{
 					document.getElementById("score1").innerHTML = opponents[i].names + ": " + opponents[i].Score;
@@ -512,26 +526,29 @@
 			}
 		}
         function updateGameArea() {
-            myGameArea.clear();
+			if(isGamePlaying)
+			{
+				myGameArea.clear();
+			}
             myGamePiece.speedX = 0;
             myGamePiece.speedY = 0;
 			if(ID == 1 || ID == 3)
 			{
-				if (myGameArea.key && myGameArea.key == 37 && myGamePiece.x > 20) {myGamePiece.speedX = -2; }
-				if (myGameArea.key && myGameArea.key == 39 && myGamePiece.x < 410) {myGamePiece.speedX = 2; }
+				if (myGameArea.key && myGameArea.key == 37 && xPaddleTemp > 20) {myGamePiece.speedX = -2; }
+				if (myGameArea.key && myGameArea.key == 39 && xPaddleTemp < 410) {myGamePiece.speedX = 2; }
 			}
 			if(ID == 0 || ID == 2)
 			{
-				if (myGameArea.key && myGameArea.key == 38 && myGamePiece.y > 20) {myGamePiece.speedY = -2; }
-				if (myGameArea.key && myGameArea.key == 40 && myGamePiece.y < 410) {myGamePiece.speedY = 2; }
+				if (myGameArea.key && myGameArea.key == 38 && yPaddleTemp > 20) {myGamePiece.speedY = -2; }
+				if (myGameArea.key && myGameArea.key == 40 && yPaddleTemp < 410) {myGamePiece.speedY = 2; }
 			}
             gameBall.newPos(xBall, yBall);
             myGamePiece.newPos();   
 			
 			if(isGamePlaying){
 			gameBall.update();
-			updateOppPos();
 			myGamePiece.update(ID);
+			updateOppPos();
 			}
 			if(ID == 0){
 				document.getElementById("score1").innerHTML = uName + ": " + myScore;
