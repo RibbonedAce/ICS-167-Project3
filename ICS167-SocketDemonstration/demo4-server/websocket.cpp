@@ -863,7 +863,7 @@ void webSocket::handleMessage(int id, string message) {
 	}
 	else
 	{
-		printf("Unknown prefix");
+		std::cout << "Unkown prefix: " + prefix << std::endl;
 	}
 }
 
