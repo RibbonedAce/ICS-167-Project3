@@ -871,6 +871,10 @@ void webSocket::addToInQueue(queueEntry* q) {
 	inQueue.push_back(q);
 }
 
+void webSocket::addToOutQueue(queueEntry* q) {
+	outQueue.push_back(q);
+}
+
 void webSocket::checkEvents() {
 	if (pongGame->running) {
 		outQueue.push_back(new queueEntry(-1, getPositions()));
