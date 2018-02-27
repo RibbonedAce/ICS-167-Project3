@@ -158,86 +158,87 @@ bool webSocket::wsSendClientMessage(int clientID, unsigned char opcode, string m
     if (clientID >= wsClients.size())
         return false;
 
-    if (wsClients[clientID]->ReadyState == WS_READY_STATE_CLOSING || wsClients[clientID]->ReadyState == WS_READY_STATE_CLOSED)
-        return true;
+	if (wsClients[clientID] != nullptr) {
+		if (wsClients[clientID]->ReadyState == WS_READY_STATE_CLOSING || wsClients[clientID]->ReadyState == WS_READY_STATE_CLOSED)
+			return true;
 
-    // fetch message length
-    int messageLength = message.size();
+		// fetch message length
+		int messageLength = message.size();
 
-    // set max payload length per frame
-    int bufferSize = 4096;
+		// set max payload length per frame
+		int bufferSize = 4096;
 
-    // work out amount of frames to send, based on $bufferSize
-    int frameCount = ceil((float)messageLength / bufferSize);
-    if (frameCount == 0)
-        frameCount = 1;
+		// work out amount of frames to send, based on $bufferSize
+		int frameCount = ceil((float)messageLength / bufferSize);
+		if (frameCount == 0)
+			frameCount = 1;
 
-    // set last frame variables
-    int maxFrame = frameCount - 1;
-    int lastFrameBufferLength = (messageLength % bufferSize) != 0 ? (messageLength % bufferSize) : (messageLength != 0 ? bufferSize : 0);
+		// set last frame variables
+		int maxFrame = frameCount - 1;
+		int lastFrameBufferLength = (messageLength % bufferSize) != 0 ? (messageLength % bufferSize) : (messageLength != 0 ? bufferSize : 0);
 
-    // loop around all frames to send
-    for (int i = 0; i < frameCount; i++){
-        // fetch fin, opcode and buffer length for frame
-        unsigned char fin = i != maxFrame ? 0 : WS_FIN;
-        opcode = i != 0 ? WS_OPCODE_CONTINUATION : opcode;
+		// loop around all frames to send
+		for (int i = 0; i < frameCount; i++) {
+			// fetch fin, opcode and buffer length for frame
+			unsigned char fin = i != maxFrame ? 0 : WS_FIN;
+			opcode = i != 0 ? WS_OPCODE_CONTINUATION : opcode;
 
-        size_t bufferLength = i != maxFrame ? bufferSize : lastFrameBufferLength;
-        char *buf;
-        size_t totalLength;
+			size_t bufferLength = i != maxFrame ? bufferSize : lastFrameBufferLength;
+			char *buf;
+			size_t totalLength;
 
-        // set payload length variables for frame
-        if (bufferLength <= 125) {
-            // int payloadLength = bufferLength;
-            totalLength = bufferLength + 2;
-            buf = new char[totalLength];
-            buf[0] = fin | opcode;
-            buf[1] = bufferLength;
-            memcpy(buf+2, message.substr(i*bufferSize, bufferLength).c_str(), bufferLength);
-        }
-        else if (bufferLength <= 65535) {
-            // int payloadLength = WS_PAYLOAD_LENGTH_16;
-            totalLength = bufferLength + 4;
-            buf = new char[totalLength];
-            buf[0] = fin | opcode;
-            buf[1] = WS_PAYLOAD_LENGTH_16;
-            buf[2] = bufferLength >> 8;
-            buf[3] = bufferLength;
-            memcpy(buf+4, message.substr(i*bufferSize, bufferLength).c_str(), bufferLength);
-        }
-        else {
-            // int payloadLength = WS_PAYLOAD_LENGTH_63;
-            totalLength = bufferLength + 10;
-            buf = new char[totalLength];
-            buf[0] = fin | opcode;
-            buf[1] = WS_PAYLOAD_LENGTH_63;
-            buf[2] = 0;
-            buf[3] = 0;
-            buf[4] = 0;
-            buf[5] = 0;
-            buf[6] = bufferLength >> 24;
-            buf[7] = bufferLength >> 16;
-            buf[8] = bufferLength >> 8;
-            buf[9] = bufferLength;
-            memcpy(buf+10, message.substr(i*bufferSize, bufferLength).c_str(), bufferLength);
-        }
+			// set payload length variables for frame
+			if (bufferLength <= 125) {
+				// int payloadLength = bufferLength;
+				totalLength = bufferLength + 2;
+				buf = new char[totalLength];
+				buf[0] = fin | opcode;
+				buf[1] = bufferLength;
+				memcpy(buf + 2, message.substr(i*bufferSize, bufferLength).c_str(), bufferLength);
+			}
+			else if (bufferLength <= 65535) {
+				// int payloadLength = WS_PAYLOAD_LENGTH_16;
+				totalLength = bufferLength + 4;
+				buf = new char[totalLength];
+				buf[0] = fin | opcode;
+				buf[1] = WS_PAYLOAD_LENGTH_16;
+				buf[2] = bufferLength >> 8;
+				buf[3] = bufferLength;
+				memcpy(buf + 4, message.substr(i*bufferSize, bufferLength).c_str(), bufferLength);
+			}
+			else {
+				// int payloadLength = WS_PAYLOAD_LENGTH_63;
+				totalLength = bufferLength + 10;
+				buf = new char[totalLength];
+				buf[0] = fin | opcode;
+				buf[1] = WS_PAYLOAD_LENGTH_63;
+				buf[2] = 0;
+				buf[3] = 0;
+				buf[4] = 0;
+				buf[5] = 0;
+				buf[6] = bufferLength >> 24;
+				buf[7] = bufferLength >> 16;
+				buf[8] = bufferLength >> 8;
+				buf[9] = bufferLength;
+				memcpy(buf + 10, message.substr(i*bufferSize, bufferLength).c_str(), bufferLength);
+			}
 
-        // send frame
-        int left = totalLength;
-        char *buf2 = buf;
-        do {
-            int sent = send(wsClients[clientID]->socket, buf2, left, 0);
-            if (sent == -1)
-                return false;
+			// send frame
+			int left = totalLength;
+			char *buf2 = buf;
+			do {
+				int sent = send(wsClients[clientID]->socket, buf2, left, 0);
+				if (sent == -1)
+					return false;
 
-            left -= sent;
-            if (sent > 0)
-                buf2 += sent;
-        }
-        while (left > 0);
+				left -= sent;
+				if (sent > 0)
+					buf2 += sent;
+			} while (left > 0);
 
-        delete buf;
-    }
+			delete buf;
+		}
+	}
 
     return true;
 }
@@ -851,13 +852,13 @@ void webSocket::handleMessage(int id, string message) {
 	}
 	else if (prefix == "Time")
 	{
-		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
+		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 10000);
 		outQueue.push_back(new queueEntry(id, getTime(time, message.substr(message.find(':') + 1) + ";" +
-			   to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000))));
+			   to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 10000))));
 	}
 	else if (prefix == "TimeF")
 	{
-		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 1000);
+		int time = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 10000);
 		recordTime(id, time, message.substr(message.find(':') + 1));
 	}
 	else
@@ -940,7 +941,7 @@ void webSocket::recordTime(int id, int _time, string data) {
 	int mTime = stoi(data.substr(0, data.find(';')));
 	int tTime1 = stoi(data.substr(data.find(';') + 1, data.find(';', data.find(';') + 1)));
 	int tTime2 = stoi(data.substr(data.find(';', data.find(';') + 1) + 1));
-	latency[id] = (carrySubtract(_time, mTime, 1000) - carrySubtract(tTime2, tTime1, 1000)) / 2;
+	latency[id] = (carrySubtract(_time, mTime, 10000) - carrySubtract(tTime2, tTime1, 10000)) / 2;
 	printLatency();
 }
 

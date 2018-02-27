@@ -35,7 +35,7 @@ void closeHandler(int clientID){
             server.wsSend(clientIDs[i], os.str());
     }*/
 	server.removePlayer(clientID);
-	server.sendToAll("Disconnect:" + to_string(clientID));
+	server.addToInQueue(new queueEntry(-1, "Disconnect:" + to_string(clientID)));
 }
 
 /* called when a client sends a message to the server */
