@@ -136,6 +136,7 @@ public:
 	void updateGame();
 	void handleMessage(int id, string message);
 	void addToInQueue(queueEntry* q);
+	void addToOutQueue(queueEntry* q);
 	void checkEvents();
 	//string getGameStats();
 	string getPlayers();
