@@ -954,7 +954,7 @@ void webSocket::sendToAll(string data, int mask) {
 	os << data;
 	vector<int> clientIDs = getClientIDs();
 	for (int i = 0; i < clientIDs.size(); i++) {
-		if (wsClients[i] != nullptr && i != mask && time(NULL) >= wsClients[i]->startTime + 1) {
+		if (wsClients[clientIDs[i]] != nullptr && clientIDs[i] != mask && time(NULL) >= wsClients[clientIDs[i]]->startTime + 1) {
 			wsSend(clientIDs[i], os.str());
 		}
 	}
@@ -965,7 +965,7 @@ void webSocket::sendToAllUnsafe(string data, int mask) {
 	os << data;
 	vector<int> clientIDs = getClientIDs();
 	for (int i = 0; i < clientIDs.size(); i++) {
-		if (wsClients[i] != nullptr && i != mask) {
+		if (wsClients[clientIDs[i]] != nullptr && clientIDs[i] != mask) {
 			wsSend(clientIDs[i], os.str());
 		}
 	}
