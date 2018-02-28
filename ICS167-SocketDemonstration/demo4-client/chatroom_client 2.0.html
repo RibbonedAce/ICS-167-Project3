@@ -64,6 +64,7 @@
 		var next;
 		var textFile;
 		var currentTime;
+		var DontUpDateScore = false;
 		
 		var xBall=275;
 		var yBall=275;
@@ -355,7 +356,7 @@
 				currentTime = resetDateObject() % 10000;
 				//log(payload);
 				//slice payload to get info for gamestate
-				updateBarBelow(payload);
+				//updateBarBelow(payload);
 				if(payload.substring(0,2) == "ID")
 				{
 					ID = parseInt(payload.substring(3,payload.length));
@@ -377,32 +378,11 @@
 				}
 				else if(payload.split(":")[0] == "Disconnect")
 				{
+					updateBarBelow("Player " + payload.split(":")[1] +" Disconnected");
+					console.log(payload);
 					//remove opponent at index.
-					var index = payload.split(":")[1];
-					console.log(index);
-					opponents[index].Paddle = new paddle(0,0,"#ffffff",0,0);
-					opponents[index].Paddle.update();
-					if(index == 0)
-					{
-						document.getElementById("score1").innerHTML = "";
-						document.getElementById("color1").style.backgroundColor = "#ffffff";
-					}
-					else if(index == 1)
-					{
-						document.getElementById("score2").innerHTML = "";
-						document.getElementById("color2").style.backgroundColor = "#ffffff";
-					}
-					else if(index == 2)
-					{
-						document.getElementById("score3").innerHTML = "";
-						document.getElementById("color3").style.backgroundColor = "#ffffff";
-					}
-					else if(index == 3)
-					{
-						document.getElementById("score4").innerHTML = "";
-						document.getElementById("color4").style.backgroundColor = "#ffffff";
-					}
-					updateBarBelow("Done deleting disconnected player");
+					removeDisconnectPlayer(parseInt(payload.split(":")[1]));
+					
 				}
 				else
 				{
@@ -414,15 +394,45 @@
 			
             gameBall = new ball();
         }
+		
+		function removeDisconnectPlayer(index)
+		{
+			isGamePlaying = false;
+			console.log(index);
+			opponents[index].Colors = "#ffffff";
+			opponents[index].names = "";
+			opponents[index].Score = "";
+			console.log(opponents);
+			if(index == 0)
+			{
+				document.getElementById("score1").innerHTML = "";
+				document.getElementById("color1").style.backgroundColor = "#ffffff";
+			}
+			else if(index == 1)
+			{
+				document.getElementById("score2").innerHTML = "";
+				document.getElementById("color2").style.backgroundColor = "#ffffff";
+			}
+			else if(index == 2)
+			{
+				document.getElementById("score3").innerHTML = "";
+				document.getElementById("color3").style.backgroundColor = "#ffffff";
+			}
+			else if(index == 3)
+			{
+				document.getElementById("score4").innerHTML = "";
+				document.getElementById("color4").style.backgroundColor = "#ffffff";
+			}
+			//updateBarBelow("Done deleting disconnected player");
+		}
         function disconnect()
 		{
-			//if(isGamePlaying){
-			myGameArea.clear();
-			//}
 			Server.disconnect();
 			readyStatus = false;
 			isGamePlaying = false;
+			DontUpDateScore = true;
 			eraseEverything();
+			myGameArea.clear();
 		}
         
 		function eraseEverything()
@@ -457,6 +467,7 @@
 		}
         
         function paddle(width, height, color, x, y) {
+			this.myColor = color;
 			this.gamearea = myGameArea;
             this.width = parseInt(width);
             this.height = parseInt(height);
@@ -466,7 +477,7 @@
             this.y = parseFloat(y);    
             this.update = function(numID) {
                 ctx = this.gamearea.context;
-				ctx.fillStyle = color;
+				ctx.fillStyle =	color;
 				this.x = opponents[ID].Paddle.x;
 				this.y = opponents[ID].Paddle.y;
 				ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -546,10 +557,6 @@
 			}
 		}
         function updateGameArea() {
-			if(isGamePlaying)
-			{
-				myGameArea.clear();
-			}
             myGamePiece.speedX = 0;
             myGamePiece.speedY = 0;
 			if(ID == 1 || ID == 3)
@@ -565,12 +572,18 @@
             gameBall.newPos(xBall, yBall);
             myGamePiece.newPos();   
 			
-			if(isGamePlaying){
-			gameBall.update();
-			myGamePiece.update(ID);
-			updateOppPos();
-			
+			if(isGamePlaying)
+			{
+				myGameArea.clear();
+				gameBall.update();
 			}
+			if(!DontUpDateScore)
+				myGamePiece.update(ID);
+				updateOppPos();
+				updatePlayerScore();
+			}
+		function updatePlayerScore()
+		{
 			if(ID == 0){
 				document.getElementById("score1").innerHTML = uName + ": " + myScore;
 				document.getElementById("color1").style.backgroundColor = paddleColor;
@@ -587,7 +600,7 @@
 				document.getElementById("score4").innerHTML = uName + ": " + myScore;
 				document.getElementById("color4").style.backgroundColor = paddleColor;
 			}
-        }
+		}
 		function updateBarBelow(text)
 		{
 			document.getElementById("updateBar").innerHTML = text;
