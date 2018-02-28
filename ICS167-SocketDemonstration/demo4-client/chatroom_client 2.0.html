@@ -427,12 +427,12 @@
 		}
         function disconnect()
 		{
-			myGameArea.clear();
 			Server.disconnect();
 			readyStatus = false;
 			isGamePlaying = false;
 			DontUpDateScore = true;
 			eraseEverything();
+			myGameArea.clear();
 		}
         
 		function eraseEverything()
