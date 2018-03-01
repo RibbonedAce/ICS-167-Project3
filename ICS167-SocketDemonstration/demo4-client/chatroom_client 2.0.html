@@ -479,7 +479,7 @@ function simulateInput(x){
 				sendTimef(text.split(":")[1]);
                 var now = new Date();
                 now = now.getTime();
-                console.log((updatedGraphTime - now)/1000)
+                console.log((now - updateGraphTime)/1000)
                 if(Math.floor((now - updateGraphTime)/1000) >= 1){
                     updateGraphTime = now;
                     latencies.sort(compare);
