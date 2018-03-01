@@ -43,7 +43,7 @@
 Latency over Time
 </h1>
 
-    <canvas id="latencyCanvas" width="800" height="500" style="border:5px solid #000000;">
+    <canvas id="latencyCanvas" width="600" height="350" style="border:5px solid #000000;">
     Your browser does not support the HTML5 canvas tag.
     </canvas>
 
@@ -74,6 +74,8 @@ function latencyAnalyzer(){
     var maximumX = Number.MIN_SAFE_INTEGER;
     var maximumY  = Number.MIN_SAFE_INTEGER;
     var minimumY = Number.MAX_SAFE_INTEGER;
+    var minimumP = Number.MAX_SAFE_INTEGER;
+    var maximumP = Number.MIN_SAFE_INTEGER;
     var canvasHeight;
     var canvasWidth;
     var xAxis = {x1: 50, x2: 550, y: 300, increment: 10};
@@ -84,25 +86,11 @@ function latencyAnalyzer(){
       return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
-    function addPoint()
-    {
-        var p = {x: currentTime, y:Math.floor(Math.random() * 800)};
-        points.push(p)
-        currentTime += 1;
-    }
-
     function drawLine(x1, y1, x2, y2){
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.stroke();
-    }
-
-
-
-    function simulateInput()
-    {
-        addPoint();
     }
 
 
@@ -165,13 +153,8 @@ function latencyAnalyzer(){
         var increment = (xAxis.x2 - xAxis.x1)/xAxis.increment;
         for (i = xAxis.x1 + increment; i <= xAxis.x2;){
             drawLine(i, xAxis.y-5, i, xAxis.y+5);
-            var ival = i.map(xAxis.x1, xAxis.x2, minimumX, maximumX);
-            if (ival <= 0 || ival > 9999999){
-                ival = " "
-            } else {
-                ival = ival.toString();
-                ctx.strokeText(ival, i-63, xAxis.y+20);
-            }
+            var ival = i.map(xAxis.x1, xAxis.x2, minimumP, maximumP).toString();
+            ctx.strokeText(ival, i-23, xAxis.y+20);
             i += increment;
         }
 
@@ -186,12 +169,8 @@ function latencyAnalyzer(){
             drawLine(yAxis.x-5, i, yAxis.x+5, i);
             var temp = i;
             var ival = (Math.round(temp.map(yAxis.y2, yAxis.y1, 0, maximumY)*100)/100);
-            if (ival < 0){
-                ival = " "
-            } else {
-                ival = ival.toString();
-                ctx.strokeText(ival, yAxis.x-40, i-22);
-            }
+            ival = ival.toString();
+            ctx.strokeText(ival, yAxis.x-45, i+4);
             i += increment;
         }
     }
@@ -209,8 +188,13 @@ function latencyAnalyzer(){
 
             }
         }
-        minimumX = points[0].x;
+        
+        try{
+            minimumX = points[0].x;
+        } finally {}
+        minimumP = points[0].index;
         maximumX = points[points.length-1].x;
+        maximumP = points[points.length-1].index;
         averageLatency = (avg/points.length);
         return {minimum: minimumY, maximum: maximumY, average: averageLatency};
     }
@@ -243,17 +227,17 @@ function latencyAnalyzer(){
     }
 }
 
-function simulateInput(x){
-    var i = new Array();
-    var t = 0;
-    var loops = 0;
-    while (loops < 300){
-        i.push({x: t, y: Math.floor(Math.random() * 800)});
-        t += Math.floor(Math.random() * 5);
-        x.updateGraph(i);
-        loops++;
-    }
-}
+//function simulateInput(x){
+//    var i = new Array();
+//    var t = 0;
+//    var loops = 0;
+//    while (loops < 300){
+//        i.push({x: t, y: Math.floor(Math.random() * 800)});
+//        t += Math.floor(Math.random() * 5);
+//        x.updateGraph(i);
+//        loops++;
+//    }
+//}
 //Used for testing     
 //window.onload = function(){
 //    var x = new latencyAnalyzer();
@@ -303,6 +287,8 @@ function simulateInput(x){
 		
 		var dx=5;
 		var dy=5;
+        
+        var packetIndex = 0;
         
         var latencyGraph = new latencyAnalyzer();
         latencyGraph.initialize();
@@ -354,11 +340,12 @@ function simulateInput(x){
 			return c;
 		}
 		
-		function getTimeStamped(latency, receiveTime)
+		function getTimeStamped(latency, receiveTime, packet)
 		{
 			var timeStamp = {
 				x: receiveTime,
-				y: latency
+				y: latency,
+                index: packet
 			}
 			return timeStamp;
 		}
@@ -394,6 +381,13 @@ function simulateInput(x){
 			var temp = resetDateObject() % 10000;
 			send("Time:" + temp.toString());
 			//console.log("Time sent");
+            var now = new Date();
+            now = now.getTime();
+            if(isGamePlaying){
+                updateGraphTime = now;
+                latencies.sort(compare);
+                latencyGraph.updateGraph(latencies);
+            }
 		}
 		
 		function carrySubstract(num1,num2,max)
@@ -402,6 +396,7 @@ function simulateInput(x){
 				num1 += max;
 			return num1 - num2;
 		}
+        
 		function sendTimef(txt)
 		{
 			if((resetDateObject() / 1000) >= next)
@@ -414,9 +409,10 @@ function simulateInput(x){
 				//send server latency check points
 				client2ndTime = resetDateObject() % 10000;
 				send("TimeF:" + server1stTimeT2.toString() + ";" + (currentTime % 10000).toString() + ";" + client2ndTime.toString());
-				var LaObject = getTimeStamped(latency,currentTime);
+				var LaObject = getTimeStamped(latency,currentTime, packetIndex);
 				latencies.push(LaObject);
 				next += 1;
+                packetIndex += 1;
 			}
 		}
 		function updateOpponentCoordinates(text)
@@ -470,7 +466,6 @@ function simulateInput(x){
 				Pos = text.split(":");
 				if(Pos.length != 1)
 					{opponents = initPlayers(Pos[1]);}
-				console.log(opponents);
 			}
 			if(text.split(":")[0] == "Scores")
 			{
@@ -479,14 +474,6 @@ function simulateInput(x){
 			if(text.split(":")[0] == "Time")
 			{
 				sendTimef(text.split(":")[1]);
-                var now = new Date();
-                now = now.getTime();
-                console.log((updateGraphTime - now)/1000)
-                if(Math.floor((now - updateGraphTime)/1000) >= 1){
-                    updateGraphTime = now;
-                    latencies.sort(compare);
-                    latencyGraph.updateGraph(latencies);
-                }
 			}
 		}
         
@@ -546,9 +533,11 @@ function simulateInput(x){
 					myScore = res[3].split(",")[1];
 				}
 		}
+        
 		function send( text ) {
 			Server.send( 'message', text );
 		}
+        
 		function getColor()
 		{
 			while ( paddleColor == "#ffffff")
@@ -556,11 +545,13 @@ function simulateInput(x){
 				paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			}
 		}
+        
 		function PlayMusic()
 		{
 			backgroundMusic = new sound("song.mp3");
 			backgroundMusic.play();
 		}
+        
         function connect(){
             var ip = document.getElementById("ipEntry").value;
 			var port = document.getElementById("portEntry").value;
@@ -662,6 +653,7 @@ function simulateInput(x){
 			}
 			//updateBarBelow("Done deleting disconnected player");
 		}
+        
         function disconnect()
 		{
 			Server.disconnect();
@@ -846,6 +838,7 @@ function simulateInput(x){
 		{
 			document.getElementById("updateBar").innerHTML = text;
 		}
+        
 		function sound(src) {
 			this.sound = document.createElement("audio");
 			this.sound.src = src;
