@@ -284,7 +284,7 @@ function simulateInput(x){
 		var server1stTimeT2;
 		var latency;
 		var next;
-		var textFile;
+		var backgroundMusic;
 		var currentTime;
 		var DontUpDateScore = false;
 		
@@ -556,25 +556,16 @@ function simulateInput(x){
 				paddleColor = '#'+Math.floor(Math.random()*16777215).toString(16).toUpperCase();
 			}
 		}
-		function assignTextFile()
+		function PlayMusic()
 		{
-			/*if(ID == 0)
-				textFile = "/Client0.txt";
-			else if(ID == 1)
-				textFile = new StreamWriter("/Client1.txt");
-			else if(ID == 2)
-				textFile = new StreamWriter("/Client2.txt");
-			else if(ID == 3)
-				textFile = new StreamWriter("/Client3.txt");*/
+			backgroundMusic = new sound("song.mp3");
+			backgroundMusic.play();
 		}
-		
         function connect(){
             var ip = document.getElementById("ipEntry").value;
 			var port = document.getElementById("portEntry").value;
 			uName = document.getElementById("nameEntry").value;
 			Server = new FancyWebSocket('ws://' + ip + ":" + port);
-			getColor();
-			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
 					send( this.value );
@@ -583,6 +574,8 @@ function simulateInput(x){
 			});
 			//Let the user know we're connected
 			Server.bind('open', function() {
+				getColor();
+				PlayMusic();
                 document.getElementById("connectButton").disabled = true;
 				uName = document.getElementById("nameEntry").value;
 				send("Name:" + uName.toString() + ";" + paddleColor.substring(1,paddleColor.length));
@@ -612,7 +605,6 @@ function simulateInput(x){
 					xPaddleTemp = xPaddle;
 					yPaddleTemp = yPaddle;
 					myGamePiece = new paddle(paddleW,paddleH,paddleColor,xPaddle,yPaddle);
-					assignTextFile();
 					myGameArea.start();
 				}
 				else if(payload == "Start game")
@@ -678,6 +670,7 @@ function simulateInput(x){
 			eraseEverything();
 			myGameArea.clear();
 			ready();
+			backgroundMusic.stop();
 		}
         
 		function eraseEverything()
@@ -852,6 +845,20 @@ function simulateInput(x){
 		function updateBarBelow(text)
 		{
 			document.getElementById("updateBar").innerHTML = text;
+		}
+		function sound(src) {
+			this.sound = document.createElement("audio");
+			this.sound.src = src;
+			this.sound.setAttribute("preload", "auto");
+			this.sound.setAttribute("controls", "none");
+			this.sound.style.display = "none";
+			document.body.appendChild(this.sound);
+			this.play = function(){
+				this.sound.play();
+			}
+			this.stop = function(){
+				this.sound.pause();
+			}
 		}
 	</script>
     
