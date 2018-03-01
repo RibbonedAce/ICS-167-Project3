@@ -165,9 +165,14 @@ function latencyAnalyzer(){
         var increment = (xAxis.x2 - xAxis.x1)/xAxis.increment;
         for (i = xAxis.x1 + increment; i <= xAxis.x2;){
             drawLine(i, xAxis.y-5, i, xAxis.y+5);
-            var ival = i.map(xAxis.x1, xAxis.x2, minimumX, maximumX).toString();
+            var ival = i.map(xAxis.x1, xAxis.x2, minimumX, maximumX);
+            if (ival <= 0 || ival > 9999999){
+                ival = " "
+            } else {
+                ival = ival.toString();
+                ctx.strokeText(ival, i-63, xAxis.y+20);
+            }
             i += increment;
-            ctx.strokeText(ival, i-63, xAxis.y+20);
         }
 
         //Y axis
@@ -180,9 +185,14 @@ function latencyAnalyzer(){
         for (i = yAxis.y1; i < yAxis.y2;){
             drawLine(yAxis.x-5, i, yAxis.x+5, i);
             var temp = i;
-            var ival = (Math.round(temp.map(yAxis.y2, yAxis.y1, 0, maximumY)*100)/100).toString();
+            var ival = (Math.round(temp.map(yAxis.y2, yAxis.y1, 0, maximumY)*100)/100);
+            if (ival < 0){
+                ival = " "
+            } else {
+                ival = ival.toString();
+                ctx.strokeText(ival, yAxis.x-40, i-22);
+            }
             i += increment;
-            ctx.strokeText(ival, yAxis.x-40, i-22);
         }
     }
 
@@ -229,6 +239,7 @@ function latencyAnalyzer(){
         xAxis.x2 = c.width-border;
         xAxis.y = c.height-border;
         yAxis.y2 = c.height-border;
+        drawAxis();
     }
 }
 
@@ -294,7 +305,8 @@ function simulateInput(x){
 		var dx=5;
 		var dy=5;
         
-        var latencyGraph = new latencyAnalyzer();;
+        var latencyGraph = new latencyAnalyzer();
+        latencyGraph.initialize();
         var updateGraphTime = -1;
 		
         function playerPos(id){
@@ -465,7 +477,8 @@ function simulateInput(x){
 			if(text.split(":")[0] == "Time")
 			{
 				sendTimef(text.split(":")[1]);
-                var now = new Date().getTIme();
+                var now = new Date();
+                now = now.getTime();
                 if(Math.floor((updateGraphTime - now)/1000) >= 1){
                     updateGraphTime = now;
                     latencyGraph.updateGraph(latencies);
