@@ -298,7 +298,6 @@ function simulateInput(x){
 		var paddleH;
         var paddleColor = "#ffffff";
 		var opponents = [];
-		var aLength = 0;
 		var xPaddleTemp;
 		var yPaddleTemp;
 		
@@ -434,15 +433,16 @@ function simulateInput(x){
 		}
 		function initPlayers(strng)
 		{
+			var tempArr = [];
 			var temp = strng.split(";");
-			for(i = aLength; i < temp.length; ++i)
+			for(i = 0; i < temp.length; ++i)
 			{
 				var index = temp[i].split(",");
 				var newC = "#" + index[2];
 				var o = structPlayer(index[1],index[0],newC,0);
-				opponents.push(o);
-				aLength++;
+				tempArr.push(o);
 			}
+			return tempArr;
 		}
 		function ProcessPayLoad(text)
 		{
@@ -466,9 +466,11 @@ function simulateInput(x){
 			}
 			if(text.substring(0,4) == "init")
 			{	
+				DontUpDateScore = false;
 				Pos = text.split(":");
 				if(Pos.length != 1)
-					initPlayers(Pos[1]);
+					{opponents = initPlayers(Pos[1]);}
+				console.log(opponents);
 			}
 			if(text.split(":")[0] == "Scores")
 			{
@@ -479,7 +481,7 @@ function simulateInput(x){
 				sendTimef(text.split(":")[1]);
                 var now = new Date();
                 now = now.getTime();
-                console.log((updatedGraphTime - now)/1000)
+                console.log((updateGraphTime - now)/1000)
                 if(Math.floor((now - updateGraphTime)/1000) >= 1){
                     updateGraphTime = now;
                     latencies.sort(compare);
@@ -671,11 +673,11 @@ function simulateInput(x){
         function disconnect()
 		{
 			Server.disconnect();
-			readyStatus = false;
 			isGamePlaying = false;
 			DontUpDateScore = true;
 			eraseEverything();
 			myGameArea.clear();
+			ready();
 		}
         
 		function eraseEverything()
@@ -822,10 +824,12 @@ function simulateInput(x){
 				gameBall.update();
 			}
 			if(!DontUpDateScore)
+			{
 				myGamePiece.update(ID);
 				updateOppPos();
 				updatePlayerScore();
 			}
+		}
 		function updatePlayerScore()
 		{
 			if(ID == 0){
