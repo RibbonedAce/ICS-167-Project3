@@ -465,7 +465,7 @@ function simulateInput(x){
 			if(text.split(":")[0] == "Time")
 			{
 				sendTimef(text.split(":")[1]);
-                var now = new Date().getTIme();
+                var now = new Date().getTime();
                 if(Math.floor((updateGraphTime - now)/1000) >= 1){
                     updateGraphTime = now;
                     latencyGraph.updateGraph(latencies);
