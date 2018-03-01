@@ -410,10 +410,10 @@ function simulateInput(x){
 				server1stTimeT1 = parseInt(txt.split(";")[1]);
 				server1stTimeT2 = parseInt(txt.split(";")[2]);
 				//calculate latency
-				latency = (carrySubstract(currentTime,client1stTime,10000) - carrySubstract(server1stTimeT2,server1stTimeT1,10000)) / 2;
+				latency = (carrySubstract(currentTime % 10000,client1stTime,10000) - carrySubstract(server1stTimeT2,server1stTimeT1,10000)) / 2;
 				//send server latency check points
 				client2ndTime = resetDateObject() % 10000;
-				send("TimeF:" + server1stTimeT2.toString() + ";" + currentTime.toString() + ";" + client2ndTime.toString());
+				send("TimeF:" + server1stTimeT2.toString() + ";" + (currentTime % 10000).toString() + ";" + client2ndTime.toString());
 				var LaObject = getTimeStamped(latency,currentTime);
 				latencies.push(LaObject);
 				next += 1;
@@ -590,7 +590,7 @@ function simulateInput(x){
 			//Log any messages sent from server
 			Server.bind('message', function( payload ) 
 			{
-				currentTime = resetDateObject() % 10000;
+				currentTime = resetDateObject();
 				//log(payload);
 				//slice payload to get info for gamestate
 				//updateBarBelow(payload);

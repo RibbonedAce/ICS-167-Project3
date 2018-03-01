@@ -1,3 +1,0 @@
-C:/Users/Eisah Jones/Documents/pongServer/cmake-build-debug/CMakeFiles/pongServer.dir
-C:/Users/Eisah Jones/Documents/pongServer/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Eisah Jones/Documents/pongServer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
