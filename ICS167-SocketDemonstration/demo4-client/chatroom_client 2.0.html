@@ -6,8 +6,7 @@
 <head>
     <link rel="stylesheet" type="text/css" href="pongClient.css">
 </head>
-<center>
-<body>  
+<center><body>  
     
     <div class="serverContainer">
         <div>IP: <input type="text" name="ip" value="127.0.0.1" id="ipEntry"></div>
@@ -40,8 +39,218 @@
         <label type="text" name="updates" id="updateBar">Welcome to Multiplayer Pong</label>
     </div>
     
-</body>
-</center> 
+    <h1>
+Latency over Time
+</h1>
+
+    <canvas id="latencyCanvas" width="800" height="500" style="border:5px solid #000000;">
+    Your browser does not support the HTML5 canvas tag.
+    </canvas>
+
+    <div class="playerContainer">
+        <div><label type="text" name="min" id="min">Min latency: -</label></div>
+        <div><label type="text" name="max" id="max">Max latency: -</label></div>
+        <div><label type="text" name="avg" id="avg"><font color = "#ff0000">Avg latency: -</font></label></div>
+    </div>
+    
+    
+    
+</body></center> 
+    <script>
+
+function latencyAnalyzer(){
+    var c;
+    var ctx;
+    var startTime = 0;
+    var currentTime = 0;
+    var points = [];
+    var currentDelay = 0;
+    var totalNum = 0;
+    var averageLatency = 0;
+    var limit = 100;
+    var border = 50;
+
+    var minimumX = Number.MAX_SAFE_INTEGER;
+    var maximumX = Number.MIN_SAFE_INTEGER;
+    var maximumY  = Number.MIN_SAFE_INTEGER;
+    var minimumY = Number.MAX_SAFE_INTEGER;
+    var canvasHeight;
+    var canvasWidth;
+    var xAxis = {x1: 50, x2: 550, y: 300, increment: 10};
+    var yAxis = {x: 50, y1: 50, y2: 300, increment: 10};
+
+
+    Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+      return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
+
+    function addPoint()
+    {
+        var p = {x: currentTime, y:Math.floor(Math.random() * 800)};
+        points.push(p)
+        currentTime += 1;
+    }
+
+    function drawLine(x1, y1, x2, y2){
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+
+
+    function simulateInput()
+    {
+        addPoint();
+    }
+
+
+    function prunePoints(){
+        while(points.length > limit){
+            points.splice(0, 1);
+        }
+        getStats();
+        updateInfo();
+    }
+
+
+    function plotPoints()
+    {
+
+        var originX;
+        var originY;
+        var endX;
+        var endY;
+        prunePoints();
+        if (points.length >= 0)
+        {
+            originX = points[0].x.map(minimumX, maximumX, xAxis.x1, xAxis.x2);
+            originY = points[0].y.map(0, maximumY, yAxis.y2, yAxis.y1);
+            for (i = 1; i < points.length; i+= 1)
+            {
+                var endX = points[i].x.map(minimumX, maximumX, xAxis.x1, xAxis.x2);
+                var endY = points[i].y.map(0, maximumY, yAxis.y2, yAxis.y1);
+                drawLine(originX, originY, endX, endY);
+                originX = endX;
+                originY = endY;
+
+            }
+
+            ctx.strokeStyle="#FF0000";
+            var avgY = averageLatency.map(0, maximumY, yAxis.y2, yAxis.y1);
+            drawLine(xAxis.x1, avgY, xAxis.x2, avgY);
+            ctx.strokeStyle="#000000";
+        }
+    }
+
+    function drawAxisLabels(x, y, tx, ty){
+        if(Number.isInteger(x)){
+            drawLine(x, 305, x, 315);
+            ctx.font = "15px Arial";
+            ctx.fillText(x.toString(),x-12,330);
+        } else {
+            drawLine(x, 305, x, 315);
+        }
+    }
+
+    function drawAxis() 
+    {
+        //X axis
+        ctx.strokeText("Time", c.width/2, xAxis.y+40)
+        ctx.beginPath();
+        ctx.moveTo(xAxis.x1, xAxis.y);
+        ctx.lineTo(xAxis.x2, xAxis.y);
+        ctx.stroke();
+        var increment = (xAxis.x2 - xAxis.x1)/xAxis.increment;
+        for (i = xAxis.x1 + increment; i <= xAxis.x2;){
+            drawLine(i, xAxis.y-5, i, xAxis.y+5);
+            var ival = i.map(xAxis.x1, xAxis.x2, minimumX, maximumX).toString();
+            i += increment;
+            ctx.strokeText(ival, i-63, xAxis.y+20);
+        }
+
+        //Y axis
+        ctx.strokeText("Latency", yAxis.x-40, yAxis.y1-20)
+        ctx.beginPath();
+        ctx.moveTo(yAxis.x, yAxis.y1);
+        ctx.lineTo(yAxis.x, yAxis.y2);
+        ctx.stroke();
+        increment = (yAxis.y2 - yAxis.y1)/yAxis.increment;
+        for (i = yAxis.y1; i < yAxis.y2;){
+            drawLine(yAxis.x-5, i, yAxis.x+5, i);
+            var temp = i;
+            var ival = (Math.round(temp.map(yAxis.y2, yAxis.y1, 0, maximumY)*100)/100).toString();
+            i += increment;
+            ctx.strokeText(ival, yAxis.x-40, i-22);
+        }
+    }
+
+    function getStats(){
+        var avg = 0;
+        for (i = 0; i < points.length; i++){
+            var y = points[i].y;
+            avg += y;
+            if (y > maximumY){
+                maximumY = y;
+            }
+            if (y < minimumY){
+                minimumY = y;
+
+            }
+        }
+        minimumX = points[0].x;
+        maximumX = points[points.length-1].x;
+        averageLatency = (avg/points.length);
+        return {minimum: minimumY, maximum: maximumY, average: averageLatency};
+    }
+
+    function updateInfo(){
+        var v = getStats();
+        document.getElementById("min").innerHTML = "Min latency: " + v.minimum.toString();
+        document.getElementById("max").innerHTML = "Max latency: " + v.maximum.toString();
+        document.getElementById("avg").innerHTML = "<font color = '#ff0000'>Avg latency: " + (Math.round(v.average * 100)/100).toString() + "</font>";
+
+    }
+
+    this.updateGraph = function(updatedPoints){
+        points = updatedPoints;
+        ctx.clearRect(0, 0, c.width, c.height);
+        getStats();
+        updateInfo();
+        drawAxis();
+        plotPoints();
+    }
+
+    this.initialize = function(){
+        c = document.getElementById("latencyCanvas");
+        ctx = c.getContext("2d");
+        ctx.font = "15px Times New Roman";
+        xAxis.x2 = c.width-border;
+        xAxis.y = c.height-border;
+        yAxis.y2 = c.height-border;
+    }
+}
+
+function simulateInput(x){
+    var i = new Array();
+    var t = 0;
+    var loops = 0;
+    while (loops < 300){
+        i.push({x: t, y: Math.floor(Math.random() * 800)});
+        t += Math.floor(Math.random() * 5);
+        x.updateGraph(i);
+        loops++;
+    }
+}
+//Used for testing     
+//window.onload = function(){
+//    var x = new latencyAnalyzer();
+//    x.initialize();
+//    simulateInput(x);
+//}
+
+</script>
     
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
@@ -84,6 +293,9 @@
 		
 		var dx=5;
 		var dy=5;
+        
+        var latencyGraph = new latencyAnalyzer();;
+        var updateGraphTime = -1;
 		
         function playerPos(id){
 			var arr;
@@ -134,8 +346,8 @@
 		function getTimeStamped(latency, receiveTime)
 		{
 			var timeStamp = {
-				Latency: latency,
-				Receive: receiveTime
+				x: receiveTime,
+				y: latency
 			}
 			return timeStamp;
 		}
@@ -253,6 +465,11 @@
 			if(text.split(":")[0] == "Time")
 			{
 				sendTimef(text.split(":")[1]);
+                var now = new Date().getTIme();
+                if(Math.floor((updateGraphTime - now)/1000) >= 1){
+                    updateGraphTime = now;
+                    latencyGraph.updateGraph(latencies);
+                }
 			}
 		}
         
@@ -377,6 +594,7 @@
 				{
 					//myGameArea.start();
 					isGamePlaying = true;
+                    gameStartTime = new Date().getTime();
 				}
 				else if(payload.split(":")[0] == "Disconnect")
 				{
@@ -530,6 +748,7 @@
                 this.y = y; 
             }
         }
+        
         function updateOppPos()
 		{
 			for(i = 0 ; i < opponents.length;i++)
@@ -608,4 +827,5 @@
 			document.getElementById("updateBar").innerHTML = text;
 		}
 	</script>
+    
 </html>
