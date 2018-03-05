@@ -700,6 +700,14 @@ function latencyAnalyzer(){
 				this.y = opponents[ID].Paddle.y;
 				ctx.fillRect(this.x, this.y, this.width, this.height);
             }
+			this.update = function()
+			{
+				this.x = xPaddleTemp;
+				this.y = yPaddleTemp;
+				ctx = this.gamearea.context;
+				ctx.fillStyle =	color;
+				ctx.fillRect(this.x,this.y, this.width, this.height);
+			}
             this.newPos = function() {
 				if(isGamePlaying){
 					xPaddleTemp += this.speedX;
@@ -748,7 +756,6 @@ function latencyAnalyzer(){
 					speedX = 2;
 				else if( val < 0 )
 					speedX = -2;
-				else speedX =0;
 			}
 			this.setSpeedY = function(val)
 			{
@@ -756,27 +763,26 @@ function latencyAnalyzer(){
 					speedY = 2;
 				else if( val < 0 )
 					speedY = -2;
-				else speedY = 0;
 			}
         }
         function updateOpponentCoordinates(text)
 		{
 				var res = text.split(";");
 				//opponent ID: 0.
-				opponents[0].Paddle.setSpeedY(parseFloat(res[1].split(",")[1]) - opponents[0].Paddle.getY());
-				console.log("opponents[0]'s speedY: "+opponents[0].speedY);
+				opponents[0].Paddle.setSpeedY(parseFloat(res[1].split(",")[1]) - parseFloat(opponents[0].Paddle.getY()));
+				console.log(parseFloat(res[1].split(",")[1]) - opponents[0].Paddle.getY());
 				opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
 				//opponent ID: 1
-				opponents[1].Paddle.setSpeedX(parseFloat(res[2].split(",")[1]) - opponents[1].Paddle.getX());
-				console.log("opponents[1]'s speedY: "+opponents[1].speedX);
+				opponents[1].Paddle.setSpeedX(parseFloat(res[2].split(",")[1]) - parseFloat(opponents[1].Paddle.getX()));
+				//console.log(parseFloat(res[2].split(",")[1]) - opponents[1].Paddle.getX());
 				opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
 				//opponent ID: 2
-				opponents[2].Paddle.setSpeedY(parseFloat(res[3].split(",")[1]) - opponents[2].Paddle.getY());
-				console.log("opponents[2]'s speedY: "+opponents[2].speedY);
+				opponents[2].Paddle.setSpeedY(parseFloat(res[3].split(",")[1]) - parseFloat(opponents[2].Paddle.getY()));
+				//console.log(parseFloat(res[3].split(",")[1]) - opponents[2].Paddle.getY());
 				opponents[2].Paddle.setY(parseFloat(res[3].split(",")[1]));
 				//opponent ID: 3
-				opponents[3].Paddle.setSpeedX(parseFloat(res[4].split(",")[1]) - opponents[3].Paddle.getX());
-				console.log("opponents[3]'s speedY: "+opponents[3].speedX);
+				opponents[3].Paddle.setSpeedX(parseFloat(res[4].split(",")[1]) - parseFloat(opponents[3].Paddle.getX()));
+				//console.log(parseFloat(res[4].split(",")[1]) - opponents[3].Paddle.getX());
 				opponents[3].Paddle.setX(parseFloat(res[4].split(",")[1]));
 		}
         
@@ -842,13 +848,13 @@ function latencyAnalyzer(){
             myGamePiece.speedY = 0;
 			if(ID == 1 || ID == 3)
 			{
-				if (myGameArea.key && myGameArea.key == 37 && xPaddleTemp > 20) {myGamePiece.speedX = -2; }
-				if (myGameArea.key && myGameArea.key == 39 && xPaddleTemp < 410) {myGamePiece.speedX = 2; }
+				if (myGameArea.key && myGameArea.key == 65 && xPaddleTemp > 20) {myGamePiece.speedX = -2; }
+				if (myGameArea.key && myGameArea.key == 68 && xPaddleTemp < 410) {myGamePiece.speedX = 2; }
 			}
 			if(ID == 0 || ID == 2)
 			{
-				if (myGameArea.key && myGameArea.key == 38 && yPaddleTemp > 20) {myGamePiece.speedY = -2; }
-				if (myGameArea.key && myGameArea.key == 40 && yPaddleTemp < 410) {myGamePiece.speedY = 2; }
+				if (myGameArea.key && myGameArea.key == 87 && yPaddleTemp > 20) {myGamePiece.speedY = -2; }
+				if (myGameArea.key && myGameArea.key == 83 && yPaddleTemp < 410) {myGamePiece.speedY = 2; }
 			}
             gameBall.newPos(xBall, yBall);
             myGamePiece.newPos();   
@@ -860,7 +866,7 @@ function latencyAnalyzer(){
 			}
 			if(!DontUpDateScore)
 			{
-				myGamePiece.update(ID);
+				myGamePiece.update();
 				PredictOppPosUpdate();
 				//updateOppPos();
 				updatePlayerScore();
