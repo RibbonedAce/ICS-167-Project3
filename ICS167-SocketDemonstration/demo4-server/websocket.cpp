@@ -925,7 +925,7 @@ string webSocket::getPositions(int mask) {
 			result += ";" + to_string(i) + "," + to_string(pongGame->players[i]->position);
 		}
 	}
-	result += ";" + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count());
+	result += ";" + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 10000);
 	return result;
 }
 
