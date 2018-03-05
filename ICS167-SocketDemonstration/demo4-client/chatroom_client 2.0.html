@@ -751,18 +751,12 @@ function latencyAnalyzer(){
 			}
 			this.setSpeedX = function(val)
 			{
-				if(val > 0)
-					this.speedX = val / parseFloat(latency);
-				else if( val < 0 )
-					this.speedX = -1 * (val / parseFloat(latency));
+				this.speedX = val;
 				console.log("sX:" + this.speedX);
 			}
 			this.setSpeedY = function(val)
 			{
-				if(val > 0)
-					this.speedY = val / parseFloat(latency);
-				else if( val < 0 )
-					this.speedY = -1 * (val / parseFloat(latency));
+				this.speedY = val;
 				console.log("sY:" + this.speedY);
 			}
         }
