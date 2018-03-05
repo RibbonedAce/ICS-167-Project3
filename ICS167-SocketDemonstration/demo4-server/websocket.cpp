@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <chrono>
 #include "websocket.h"
 #include "base64.h"
 #include "game.h"
@@ -924,6 +925,7 @@ string webSocket::getPositions(int mask) {
 			result += ";" + to_string(i) + "," + to_string(pongGame->players[i]->position);
 		}
 	}
+	result += ";" + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count());
 	return result;
 }
 
