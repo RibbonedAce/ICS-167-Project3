@@ -415,18 +415,7 @@ function latencyAnalyzer(){
                 packetIndex += 1;
 			}
 		}
-		function updateOpponentCoordinates(text)
-		{
-				var res = text.split(";");
-				//Player's position.
-				opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
-				//opponent ID: 1
-				opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
-				//opponent ID: 2
-				opponents[2].Paddle.setY(parseFloat(res[3].split(",")[1]));
-				//opponent ID: 3
-				opponents[3].Paddle.setX(parseFloat(res[4].split(",")[1]));
-		}
+		
 		function initPlayers(strng)
 		{
 			var tempArr = [];
@@ -455,10 +444,9 @@ function latencyAnalyzer(){
 				xBall = parseInt(Pos[0]);
 				yBall = parseInt(Pos[1]);
 				
-				//console.log(opponents);
 				//Opponent update.
 				updateOpponentCoordinates(pLoad);
-				//myGameArea.clear();
+				updateOppPos();
 			}
 			if(text.substring(0,4) == "init")
 			{	
@@ -730,34 +718,68 @@ function latencyAnalyzer(){
                 ctx.fillStyle = opponent.Colors;
 				ctx.fillRect(this.x,this.y,this.width,this.height);
 			}
+			this.predictOppPos = function(opponent)
+			{
+				this.x += this.speedX;
+				this.y += this.speedY;
+				ctx = myGameArea.context;
+                ctx.fillStyle = opponent.Colors;
+				ctx.fillRect(this.x,this.y,this.width,this.height);
+			}
 			this.setX = function(XPOS)
 			{
 				this.x = XPOS;
+			}
+			this.getX = function()
+			{
+				return this.x;
 			}
 			this.setY = function(YPOS)
 			{
 				this.y = YPOS;
 			}
+			this.getY = function()
+			{
+				return this.y;
+			}
+			this.setSpeedX = function(val)
+			{
+				if(val > 0)
+					speedX = 2;
+				else if( val < 0 )
+					speedX = -2;
+				else speedX =0;
+			}
+			this.setSpeedY = function(val)
+			{
+				if(val > 0)
+					speedY = 2;
+				else if( val < 0 )
+					speedY = -2;
+				else speedY = 0;
+			}
         }
+        function updateOpponentCoordinates(text)
+		{
+				var res = text.split(";");
+				//opponent ID: 0.
+				opponents[0].Paddle.setSpeedY(parseFloat(res[1].split(",")[1]) - opponents[0].Paddle.getY());
+				console.log("opponents[0]'s speedY: "+opponents[0].speedY);
+				opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
+				//opponent ID: 1
+				opponents[1].Paddle.setSpeedX(parseFloat(res[2].split(",")[1]) - opponents[1].Paddle.getX());
+				console.log("opponents[1]'s speedY: "+opponents[1].speedX);
+				opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
+				//opponent ID: 2
+				opponents[2].Paddle.setSpeedY(parseFloat(res[3].split(",")[1]) - opponents[2].Paddle.getY());
+				console.log("opponents[2]'s speedY: "+opponents[2].speedY);
+				opponents[2].Paddle.setY(parseFloat(res[3].split(",")[1]));
+				//opponent ID: 3
+				opponents[3].Paddle.setSpeedX(parseFloat(res[4].split(",")[1]) - opponents[3].Paddle.getX());
+				console.log("opponents[3]'s speedY: "+opponents[3].speedX);
+				opponents[3].Paddle.setX(parseFloat(res[4].split(",")[1]));
+		}
         
-        function ball() {
-            this.gamearea = myGameArea;  
-            this.x = 275;
-            this.y = 275;
-            this.update = function() {
-                ctx = myGameArea.context;
-                ctx.beginPath();
-                ctx.fillStyle="#ff0000";
-                ctx.arc(this.x,this.y,10,0,Math.PI*2,true);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-            }
-            this.newPos = function(x, y) {
-                this.x = x;
-                this.y = y; 
-            }
-        }
         
         function updateOppPos()
 		{
@@ -765,6 +787,34 @@ function latencyAnalyzer(){
 			{
 				if(ID != i)
 					opponents[i].Paddle.newOppPos(opponents[i]);
+				if(opponents[i].IDs == 0)
+				{
+					document.getElementById("score1").innerHTML = opponents[i].names + ": " + opponents[i].Score;
+					document.getElementById("color1").style.backgroundColor = opponents[i].Colors;
+				}
+				else if(opponents[i].IDs == 1)
+				{
+					document.getElementById("score2").innerHTML = opponents[i].names +": " + opponents[i].Score;
+					document.getElementById("color2").style.backgroundColor = opponents[i].Colors;
+				}
+				else if(opponents[i].IDs == 2)
+				{
+					document.getElementById("score3").innerHTML = opponents[i].names +": " + opponents[i].Score;
+					document.getElementById("color3").style.backgroundColor = opponents[i].Colors;
+				}
+				else
+				{
+					document.getElementById("score4").innerHTML = opponents[i].names +": " +opponents[i].Score;
+					document.getElementById("color4").style.backgroundColor = opponents[i].Colors;
+				}
+			}
+		}
+		function PredictOppPosUpdate()
+		{
+			for(i = 0 ; i < opponents.length;i++)
+			{
+				if(ID != i)
+					opponents[i].Paddle.predictOppPos(opponents[i]);
 				if(opponents[i].IDs == 0)
 				{
 					document.getElementById("score1").innerHTML = opponents[i].names + ": " + opponents[i].Score;
@@ -811,10 +861,29 @@ function latencyAnalyzer(){
 			if(!DontUpDateScore)
 			{
 				myGamePiece.update(ID);
-				updateOppPos();
+				PredictOppPosUpdate();
+				//updateOppPos();
 				updatePlayerScore();
 			}
 		}
+		function ball() {
+            this.gamearea = myGameArea;  
+            this.x = 275;
+            this.y = 275;
+            this.update = function() {
+                ctx = myGameArea.context;
+                ctx.beginPath();
+                ctx.fillStyle="#ff0000";
+                ctx.arc(this.x,this.y,10,0,Math.PI*2,true);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            this.newPos = function(x, y) {
+                this.x = x;
+                this.y = y; 
+            }
+        }
 		function updatePlayerScore()
 		{
 			if(ID == 0){
