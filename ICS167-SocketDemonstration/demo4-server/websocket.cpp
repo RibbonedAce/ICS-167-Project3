@@ -925,7 +925,7 @@ string webSocket::getPositions(int mask) {
 			result += ";" + to_string(i) + "," + to_string(pongGame->players[i]->position);
 		}
 	}
-	result += ";" + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() % 10000);
+	result += ";" + to_string(clock());
 	return result;
 }
 
@@ -978,7 +978,7 @@ void webSocket::printLatency() {
 	for (auto& i : latency) {
 		result += i;
 	}
-	printf("Latency: %d\n", result / MAX_CLIENTS);
+	//printf("Latency: %d\n", result / MAX_CLIENTS);
 }
 
 void webSocket::checkQueues() {
