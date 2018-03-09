@@ -185,7 +185,6 @@ function latencyAnalyzer(){
             }
             if (y < minimumY){
                 minimumY = y;
-
             }
         }
         
@@ -293,6 +292,8 @@ function latencyAnalyzer(){
         var latencyGraph = new latencyAnalyzer();
         latencyGraph.initialize();
         var updateGraphTime = -1;
+        
+        var currentPacketTime = 0;
 		
         function playerPos(id){
 			var arr;
@@ -439,14 +440,15 @@ function latencyAnalyzer(){
 				//console.log(pLoad);
 				var res = pLoad.split(";");
 				Pos = res[0].split(",");
-				
-				//Ball Coordinates update.
-				xBall = parseInt(Pos[0]);
-				yBall = parseInt(Pos[1]);
-				
-				//Opponent update.
-				updateOpponentCoordinates(pLoad);
-				updateOppPos();
+                if(parseInt(res[5]) > currentPacketTime){
+                    //Ball Coordinates update.
+				    xBall = parseInt(Pos[0]);
+				    yBall = parseInt(Pos[1]);
+                    currentPacketTime = parseInt(res[5]);
+				    //Opponent update.
+				    updateOpponentCoordinates(pLoad);
+				    //updateOppPos();
+                }
 			}
 			if(text.substring(0,4) == "init")
 			{	
@@ -684,6 +686,7 @@ function latencyAnalyzer(){
 		}
         
         function paddle(width, height, color, x, y) {
+            this.lastVal = 0;
 			this.myColor = color;
 			this.gamearea = myGameArea;
             this.width = parseInt(width);
@@ -751,30 +754,60 @@ function latencyAnalyzer(){
 			}
 			this.setSpeedX = function(val)
 			{
+                if(this.myColor == "#e5ff1f"){
+                console.log(this.myColor, val);}
+                if(val > 0){
+                    if(this.lastVal == -2){
+                        val = -2;
+                    } else {
+                        val = 2 ;
+                    }
+                } else if (val < 0){
+                    if(this.lastVal == 2){
+                        val = 2;
+                    } else {
+                        val = -2 ;
+                    }
+                }
+                if(this.myColor == "#e5ff1f"){
+                console.log(this.myColor, val);}
 				this.speedX = val;
-				console.log("sX:" + this.speedX);
 			}
 			this.setSpeedY = function(val)
 			{
-				this.speedY = val;
-				console.log("sY:" + this.speedY);
+                if(this.myColor == "#e5ff1f"){
+                console.log(this.myColor, val);}
+				if(val > 0){
+                    if(this.lastVal == -2){
+                        val = -2;
+                    } else {
+                        val = 2 ;
+                    }
+                } else if (val < 0){
+                    if(this.lastVal == 2){
+                        val = 2;
+                    } else {
+                        val = -2 ;
+                    }
+                }
+                if(this.myColor == "#e5ff1f"){
+                console.log(this.myColor, val);}
+                this.speedY = val;
 			}
         }
+        
         function updateOpponentCoordinates(text)
 		{
+                //New
 				var res = text.split(";");
 				//opponent ID: 0.
 				opponents[0].Paddle.setSpeedY(parseFloat(res[1].split(",")[1]) - parseFloat(opponents[0].Paddle.getY()));
-				opponents[0].Paddle.setY(parseFloat(res[1].split(",")[1]));
 				//opponent ID: 1
 				opponents[1].Paddle.setSpeedX(parseFloat(res[2].split(",")[1]) - parseFloat(opponents[1].Paddle.getX()));
-				opponents[1].Paddle.setX(parseFloat(res[2].split(",")[1]));
 				//opponent ID: 2
 				opponents[2].Paddle.setSpeedY(parseFloat(res[3].split(",")[1]) - parseFloat(opponents[2].Paddle.getY()));
-				opponents[2].Paddle.setY(parseFloat(res[3].split(",")[1]));
 				//opponent ID: 3
 				opponents[3].Paddle.setSpeedX(parseFloat(res[4].split(",")[1]) - parseFloat(opponents[3].Paddle.getX()));
-				opponents[3].Paddle.setX(parseFloat(res[4].split(",")[1]));
 		}
         
         
@@ -806,6 +839,7 @@ function latencyAnalyzer(){
 				}
 			}
 		}
+        
 		function PredictOppPosUpdate()
 		{
 			for(i = 0 ; i < opponents.length;i++)
@@ -863,6 +897,7 @@ function latencyAnalyzer(){
 				updatePlayerScore();
 			}
 		}
+        
 		function ball() {
             this.gamearea = myGameArea;  
             this.x = 275;
@@ -881,6 +916,7 @@ function latencyAnalyzer(){
                 this.y = y; 
             }
         }
+        
 		function updatePlayerScore()
 		{
 			if(ID == 0){
