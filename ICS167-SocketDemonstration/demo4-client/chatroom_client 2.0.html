@@ -272,7 +272,7 @@ function latencyAnalyzer(){
 		var currentTime;
 		var SomeoneDisconnected = false;
 		var InputInterval = 20;
-		var speedMulti = 2;
+		var speedMulti = 4;
 		var baseSpeed = 2;
 		var zeroes = [0, 0, 0, 0];
 		var zeroThreshold = 2;
@@ -937,8 +937,8 @@ function latencyAnalyzer(){
 			{
 				if(ID != i)
 				{
-					if(i == 3)
-						opponents[i].Paddle.drawPredictPaddle();
+					//if(i == 3)
+					//	opponents[i].Paddle.drawPredictPaddle();
 						
 					opponents[i].Paddle.predictOppPos(opponents[i]);
 				}

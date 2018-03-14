@@ -23,7 +23,7 @@ typedef void (*messageCallback)(int, string);
 
 #define MIN_LATENCY 0
 #define MAX_LATENCY 800
-#define LATENCY_MODE 0
+#define LATENCY_MODE 2
 
 #define WS_FIN 128
 #define WS_MASK 128
