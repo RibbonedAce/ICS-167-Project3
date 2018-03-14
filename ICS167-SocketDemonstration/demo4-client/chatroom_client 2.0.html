@@ -287,7 +287,7 @@ function latencyAnalyzer(){
 		var paddleH;
         var paddleColor = "#ffffff";
 		var opponents = [];
-		var updatedGameState = [];
+		//var updatedGameState = [];
 		var PayLoadArr = [];
 		var correcting = [false,false,false,false];
 		var directions = [0,0,0,0];
@@ -910,25 +910,17 @@ function latencyAnalyzer(){
 			{
 				if(i != ID)
 				{	
-					opponents[i].Paddle.updatePaddleOldPos(i,opponents[i].Paddle.getUpdatePaddlePos(i));
-					
-					//var predictP = opponents[i].Paddle.getPredictPos(i);
-					var offsetDis = offsetCalculate() * (avLatency() / InputInterval) * directions[i] * baseSpeed;
-
-					opponents[i].Paddle.setPredictPos(i, offsetDis + opponents[i].Paddle.getUpdatePaddlePos(i));
-					var currP = opponents[i].Paddle.getPos(i);
-					var predictP = opponents[i].Paddle.getPredictPos(i);
-					
-					if(predictP != currP)
+					opponents[i].Paddle.updatePaddleOldPos(i,opponents[i].Paddle.getUpdatePaddlePos(i));					
+					opponents[i].Paddle.setPredictPos(i, offsetCalculate() * (avLatency() / InputInterval) * directions[i] * baseSpeed + opponents[i].Paddle.getUpdatePaddlePos(i));
+					if(opponents[i].Paddle.getPredictPos(i) != opponents[i].Paddle.getPos(i))
 					{	
-						var absolute = Math.abs(opponents[i].Paddle.getPredictPos(i) - opponents[i].Paddle.getPos(i));
-						if(absolute <= baseSpeed * speedMulti)
+						if(Math.abs(opponents[i].Paddle.getPredictPos(i) - opponents[i].Paddle.getPos(i)) <= baseSpeed * speedMulti)
 						{							
-							opponents[i].Paddle.setPos(i,predictP);							
+							opponents[i].Paddle.setPos(i,opponents[i].Paddle.getPredictPos(i));							
 						}
 						else
 						{
-							var newSpeed = Math.min(Math.max(-1,parseInt(predictP-currP)),1) * baseSpeed * speedMulti;
+							var newSpeed = Math.min(Math.max(-1,parseInt(opponents[i].Paddle.getPredictPos(i)-opponents[i].Paddle.getPos(i))),1) * baseSpeed * speedMulti;
 							opponents[i].Paddle.setSpeed(i,newSpeed);
 						}
 					}
