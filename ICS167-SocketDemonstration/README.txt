@@ -1,34 +1,53 @@
-TEAM MEMBERS -> Equally Contributions
+TEAM MEMBERS -> Contributions
 -----------------------------
 Tyler Gemora: 31672308
 
-  - Server programmed in C++	
+  - Server programmed in C++
+    - Implemented server physics
+    - Implemented server socket protocol
+    - Designed system packet protocol
+    - Implemented server depacketization and call assignment protocol
+    - Updated server to handle multiple clients
+    - Updated client socket protocol
+    - Updated server game physics and logic
     - Updated server to implement various artificial latencies
       - Random latency
       - Incremental latency
       - Constant latency
     - Implemented server latency recording
     - Templated milestone report
+    - Provided latency mitigation algorithm pseudocode
+    - Assisted in debugging and testing client latency mitigation techniques
     - General debugging and testing
 
 Khoa Nguyen : 43498533
 
   - Client interface programmed in HTML and Javascript
+    - Implemented client socket protocol
+    - Designed and implemented prototype client interface
+    - Implemented client depacketization and call assignment protocol
+    - Assisted in upgrading and reintegrating client with server
+    - Integrated updated client with updated server
     - Implemented client queuing music
     - Implemented client calculation of latency
     - Updating client game logic and data management
+    - Implemented client's side extrapolation and interpolation
     - General debugging and testing
-    - Implemented client's side extrapolation and interpolation.
 
 Eisah Jones : 13728047
 
   - Server and Client programmed in respective languages
+    - Assisted in implementing various functions of server and client interface
+    - Designed and updated client interface and protocols
+    - Reintegrated updated client protocols with the server
+    - Updated client interface
+    - Integrated updated client with updated server
     - Created HTML framework for displaying graphed data on client
     - Integrated client with graph framework
     - Created GIFs and uploaded them to document
+    - Implemented client's side extrapolation and interpolation
     - General debugging and testing
-    - Refactored and uploaded assignment
-    - Debug the client's side extrapolation and interpolation techniques.
+    - Refactored and uploaded assignments
 
 IMPORTANT INFORMATION
 ---------------------
@@ -69,5 +88,5 @@ KNOWN BUGS
 
 # The color of player paddles sometime default to red if packet info is not completely received
 
-# If the client press ready right after they are connected, sometimes they won't see the other paddles because of some issue with opponent's array not getting initialized correctly.
+# If the client presses ready right after they are connected, sometimes they won't see the other paddles because of an issue where the “opponent” array does not get initialized correctly. Client does not receive information in time.
 
